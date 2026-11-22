@@ -136,12 +136,15 @@ Ranges allow heavy-but-real use (several times a day for frequent habits). Types
 
 ### Direction: cutting back vs building up
 
-Shown with colour only, no icons or headings:
+Shown with colour only, no icons or headings. Direction colours are deliberately distinct from the good/bad green and red:
 
-- **Building up** (exercise, sleep, fruit & veg…): **green** (`#1B6B4F`, on dark `#7FD1AE`). Streak unit *days done*, status *done today ✓*.
-- **Cutting back** (snacks, alcohol, scrolling…): **blue** (`#2560C8`, on dark `#8DBBF5`). Streak unit *days clear*, status *clear today ✓*.
-- **Red** always means a slip, for either direction.
-- Applies to home tile sparklines and the streaks card (day squares, count, status). The decision chart keeps green = good outcome, red = bad outcome.
+- **Building up** (exercise, sleep, fruit & veg…): **teal** (`#0F766E`, on dark `#2DD4BF`). Streak unit *days done*, status *done today ✓*.
+- **Cutting back** (snacks, alcohol, scrolling…): **pink** (`#BE185D`, on dark `#F472B6`). Streak unit *days clear*, status *clear today ✓*.
+- Applies to home tile sparklines and the streaks card (day squares, count, status). Red still means a slip.
+
+### Good vs bad outcome
+
+Bold, classic **green** (`#15803D`, on dark `#4ADE80`) and **red** (`#DC2626`, on dark `#FF6B6B`): the decision chart, headline, projection panel and result card, and the home hero.
 
 ## 6. Projection model (deliberately loose)
 

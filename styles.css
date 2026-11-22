@@ -1,7 +1,9 @@
 :root {
   --ground: #F5F3EE; --card: #FFFFFF; --ink: #16181B; --muted: #5B6068; --line: #E4E0D8;
-  --good: #1B6B4F; --bad: #C0362C; --ghost: #9A9EA5;
-  --dark: #16181B; --dark-muted: #B9BDC4; --good-on-dark: #7FD1AE; --bad-on-dark: #FF8A7A; --bad-dark-bg: #3A1412;
+  --good: #15803D; --bad: #DC2626; --ghost: #9A9EA5;
+  --dark: #16181B; --dark-muted: #B9BDC4; --good-on-dark: #4ADE80; --bad-on-dark: #FF6B6B; --bad-dark-bg: #3A1412;
+  /* Habit direction (separate from good/bad): building up = teal, cutting back = pink */
+  --more: #0F766E; --more-on-dark: #2DD4BF; --less: #BE185D; --less-on-dark: #F472B6;
   --display: 'Space Grotesk', system-ui, sans-serif; --body: Inter, system-ui, -apple-system, sans-serif;
 }
 * { box-sizing: border-box; }
@@ -146,9 +148,10 @@ input[type=range] { width: 100%; height: 32px; margin: 0; accent-color: var(--go
 .result.placeholder { visibility: hidden; animation: none; }
 .version { margin-top: auto; padding-top: 8px; text-align: center; font-size: 11px; color: #8A8F96; letter-spacing: 0.3px; }
 
-/* Direction colour on the streaks card: cutting back = blue, building up = green. */
-.ls-row.less .sd.good { background: #8DBBF5; }
-.ls-row.less .ls-num { color: #8DBBF5; }
-.ls-row.less .ls-status.done { color: #8DBBF5; }
+/* Direction colour on the streaks card: building up = teal, cutting back = pink. Red still = slipped. */
+.ls-row.more .sd.good { background: var(--more-on-dark); }
+.ls-row.more .ls-num, .ls-row.more .ls-status.done { color: var(--more-on-dark); }
+.ls-row.less .sd.good { background: var(--less-on-dark); }
+.ls-row.less .ls-num, .ls-row.less .ls-status.done { color: var(--less-on-dark); }
 .ls-num.zero { color: #5B6068 !important; }
 .ls-num small { white-space: nowrap; }

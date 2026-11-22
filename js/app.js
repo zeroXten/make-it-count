@@ -2,8 +2,8 @@ import { load, save, uid, isValid, requestPersist } from './storage.js';
 import { VERSION } from './version.js';
 import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview, streakInfo, leverStreaks, bankedSummary } from './model.js';
 
-const C = { good: '#1B6B4F', bad: '#C0362C', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#7FD1AE', badDark: '#FF8A7A', less: '#2560C8', lessDark: '#8DBBF5' };
-/* Direction is colour: building up = green, cutting back = blue. Red always means a slip. */
+const C = { good: '#15803D', bad: '#DC2626', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#4ADE80', badDark: '#FF6B6B', more: '#0F766E', less: '#BE185D' };
+/* Direction is colour: building up = teal, cutting back = pink. Good/bad outcomes are green/red. */
 const groupOf = (l) => (TYPES[l.type] && TYPES[l.type].group) || 'more';
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const clamp = (x) => Math.max(-1, Math.min(1, x));
@@ -25,7 +25,7 @@ const nav = (hash) => { location.hash = hash; };
 
 /* ================= Home ================= */
 function spark(trend, g = 'more') {
-  const P = { up: [g === 'less' ? C.less : C.good, 'M2 18 C 14 17, 26 10, 42 3'], flat: ['#8A8F96', 'M2 15 C 14 15, 28 14, 42 14'], down: [C.bad, 'M2 15 C 12 6, 20 4, 26 7 C 32 10, 38 14, 42 16'] }[trend];
+  const P = { up: [g === 'less' ? C.less : C.more, 'M2 18 C 14 17, 26 10, 42 3'], flat: ['#8A8F96', 'M2 15 C 14 15, 28 14, 42 14'], down: [C.bad, 'M2 15 C 12 6, 20 4, 26 7 C 32 10, 38 14, 42 16'] }[trend];
   return `<svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"/><path d="${P[1]}" fill="none" stroke="${P[0]}" stroke-width="2.5" stroke-linecap="round"/></svg>`;
 }
 
