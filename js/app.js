@@ -77,19 +77,20 @@ function streakSlide() {
   const alive = all.filter(r => r.streak > 0), atRisk = alive.filter(r => !r.todayDone);
   const head = !alive.length ? 'Start a streak today.' : atRisk.length ? 'Keep them alive today.' : 'Don’t break them.';
   const champ = all.reduce((m, r) => (r.best > (m ? m.best : 0) ? r : m), null);
-  const label = { good: 'good day', bad: 'slipped', none: 'nothing logged' };
   const row = (r) => {
-    const days = r.days.slice(-7), n = r.streak;
-    const status = r.todayDone ? 'today ✓' : n ? 'today?' : r.best ? `best ${r.best}` : 'not started';
-    return `<a class="ls-row" href="#/lever/${r.lever.id}" aria-label="${esc(r.lever.name)}: ${n} day streak, ${r.todayDone ? 'done today' : 'not yet today'}. Last 7 days: ${days.map(d => label[d.state]).join(', ')}">
-      <span class="ls-name"><b>${esc(r.lever.name)}</b><span class="ls-status ${r.todayDone ? 'done' : n ? 'risk' : ''}">${status}</span></span>
+    const g = groupOf(r.lever), d = DIR[g], days = r.days.slice(-7), n = r.streak;
+    const label = { good: g === 'less' ? 'kept clear' : 'done', bad: 'slipped', none: 'nothing logged' };
+    const status = r.todayDone ? `${d.unit} today ✓` : n ? 'today?' : r.best ? `best ${r.best}` : 'not started';
+    return `<a class="ls-row" href="#/lever/${r.lever.id}" aria-label="${esc(r.lever.name)}, ${d.label.toLowerCase()}: ${n} day${n === 1 ? '' : 's'} ${d.unit}, ${r.todayDone ? 'today banked' : 'not yet today'}. Last 7 days: ${days.map(x => label[x.state]).join(', ')}">
+      <span class="ls-name"><b>${dirMark(g)}<span>${esc(r.lever.name)}</span></b><span class="ls-status ${r.todayDone ? 'done' : n ? 'risk' : ''}">${status}</span></span>
       <span class="strip ls-strip" aria-hidden="true">${days.map(d => `<span class="sd ${d.state}${d.today ? ' today' : ''}"></span>`).join('')}</span>
-      <span class="ls-num ${n ? '' : 'zero'}">${n}<small>day${n === 1 ? '' : 's'}</small></span>
+      <span class="ls-num ${n ? '' : 'zero'}">${n}<small>day${n === 1 ? '' : 's'} ${d.unit}</small></span>
     </a>`;
   };
   return `<section class="hero">
     <div class="hero-head">${head}</div>
-    <div class="ls-list">${rows.map(row).join('')}</div>
+    ${['less', 'more'].map(g => [g, rows.filter(r => groupOf(r.lever) === g)]).filter(([, rs]) => rs.length)
+      .map(([g, rs]) => `<div class="ls-group"><div class="ls-group-label">${dirMark(g)}${DIR[g].label}</div><div class="ls-list">${rs.map(row).join('')}</div></div>`).join('')}
     <div class="hero-sub">${more > 0 ? `+${more} more · ` : ''}${champ ? `Longest ever: ${esc(champ.lever.name)}, ${champ.best} day${champ.best === 1 ? '' : 's'}.` : 'A day counts when good choices outnumber bad on that habit.'}</div>
   </section>`;
 }
@@ -162,19 +163,28 @@ function showSlide(i) {
   el.scrollTo({ left: i * slideStep(el), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 
+/* Direction marker: what you're trying to do with a habit, separate from good/bad colour.
+   Cut back = outlined circle with a minus; build up = solid circle with a plus. */
+const groupOf = (l) => (TYPES[l.type] && TYPES[l.type].group) || 'more';
+const DIR = { less: { glyph: '−', label: 'Cutting back', unit: 'clear' }, more: { glyph: '+', label: 'Building up', unit: 'done' } };
+const dirMark = (g) => `<span class="dir dir-${g}" role="img" aria-label="${DIR[g].label}">${DIR[g].glyph}</span>`;
+
 function home() {
-  const tiles = data.levers.map(l => {
+  const tile = (l) => {
     const t = tileInfo(l, data.events);
     return `<a class="tile" href="#/lever/${l.id}">
-      <span class="tile-name"><span>${esc(l.name)}</span>${spark(t.trend)}</span>
+      <span class="tile-name"><span class="tile-title">${dirMark(groupOf(l))}<span>${esc(l.name)}</span></span>${spark(t.trend)}</span>
       <span class="tile-fact ${t.bad ? 'bad' : ''}">${t.fact}</span></a>`;
-  }).join('');
+  };
+  const groups = ['less', 'more'].map(g => [g, data.levers.filter(l => groupOf(l) === g)]).filter(([, ls]) => ls.length);
+  const tiles = groups.map(([g, ls], i) => `<div class="section-label dir-label">${dirMark(g)}${DIR[g].label}</div>
+    <div class="grid2">${ls.map(tile).join('')}${i === groups.length - 1 ? '<a class="tile tile-add" href="#/add">+ Add a lever</a>' : ''}</div>`).join('');
   app.innerHTML = `<main class="screen">
     <header class="row"><h1 class="brand">Make It Count</h1><button class="link" id="install" hidden>Install app</button></header>
     ${heroCarousel(data.levers.length ? [hero(heroSummary(data.levers, data.events, H.weeks)), streakSlide(), bankedSlide()] : [hero(heroSummary(data.levers, data.events, H.weeks))])}
     ${data.levers.length ? '<div class="section-label">Tap before you choose</div>' : ''}
     ${data.levers.length
-      ? `<div class="grid2">${tiles}<a class="tile tile-add" href="#/add">+ Add a lever</a></div>`
+      ? tiles
       : '<a class="btn-primary btn-start" href="#/add">Start now: pick your first habit</a>'}
     <footer class="footer">
       <span>Your data stays on this device.</span>
@@ -212,7 +222,7 @@ function decisionShell(lever) {
   app.innerHTML = `<main class="screen decision">
     <div class="row"><a href="#/" class="back">← Levers</a><a href="#/edit/${lever.id}" class="back">Edit</a></div>
     <h1 class="dec-head" id="dec-head"></h1>
-    <p class="muted dec-instr">Grab NOW and move it. Watch summer-you move with it.</p>
+    <p class="muted dec-instr"><span class="dir-pill">${dirMark(groupOf(lever))}${DIR[groupOf(lever)].label}</span> Grab NOW and move it. Watch summer-you move with it.</p>
     <div class="card chart-card">
       <svg class="drag" id="drag" viewBox="0 15 350 270" tabindex="0" role="slider" aria-orientation="vertical"
         aria-label="${esc(c.q)} Move NOW up to ${esc(c.up.slice(2))}, down to ${esc(c.down.slice(2))}. Press Enter for Done."

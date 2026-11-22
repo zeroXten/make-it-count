@@ -134,6 +134,14 @@ Ranges allow heavy-but-real use (several times a day for frequent habits). Types
 | Build up | Learning | 20 min, 3/week | better at it |
 | Build up | Mindfulness | 10 min, 3/week | calmer |
 
+### Direction: cutting back vs building up
+
+Green/red always mean **good/bad for you**, never "more/less". Direction is shown separately, in neutral ink:
+
+- **Cutting back** (snacks, alcohol, scrolling…): outlined circle with a minus **−**. Streak unit: *days clear*, status *clear today ✓*.
+- **Building up** (exercise, sleep, fruit & veg…): solid circle with a plus **+**. Streak unit: *days done*, status *done today ✓*.
+- Home groups the habit tiles under *Cutting back* and *Building up* headings, each tile with its marker; the streaks card groups its rows the same way; the decision screen shows a *− Cutting back* / *+ Building up* pill above the chart.
+
 ## 6. Projection model (deliberately loose)
 
 The numbers exist only to choose a comparison. They are never shown.
