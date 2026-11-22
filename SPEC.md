@@ -36,7 +36,7 @@ That sentence is the product. Every design decision should be tested against it.
 | **Lever** | A habit the user wants to move — either one to cut back (snacks, alcohol, screen time, spending…) or one to build up (exercise, sleep, learning…). Generic type, user-named. |
 | **Old you** | The baseline — what the user usually does. Always drawn as a flat dashed grey line. |
 | **Current path** | Where the user's recent behaviour (last ~4 weeks) is taking them. |
-| **Summer-you** | The projected future self at the horizon. Default horizon: next summer (a season you can picture beats "12 months"). Configurable later (holiday, birthday). |
+| **Summer-you** | The projected future self at the horizon: a rolling 26 weeks ahead, named after the season it lands in (*spring/summer/autumn/winter*, e.g. "by spring" in November, "by summer" in January). Copy is written with "summer" and the app swaps in the current season. A named target (holiday, birthday) could come later. |
 | **NOW** | The draggable handle. The user moves the present; the future moves further. |
 
 ## 5. Screens
@@ -46,7 +46,7 @@ That sentence is the product. Every design decision should be tested against it.
 - **Hero card**, two states:
   - *Ahead* (dark): "You're pulling away from the old you." Green line climbs away from dashed old-you; shaded gap labelled "that gap is you". "By summer, that gap is:" + chips (*lighter*, *a weekend away*, *stronger*).
   - *Slipping* (deep red): "You're drifting back to the old you." Line rose then falls back; "the gap is closing". "By summer, you're throwing away:" + chips.
-  - *First run / no choices this month* (dark): "Doing nothing isn't standing still." / "Standing still is drifting." Doing nothing is never drawn as flat: from NOW the chart forks into a green *start now* line and a red *do nothing* line drifting down, with "the gap is your choice" between them and a countdown ("summer · 30 weeks"). The lines draw in on load. On first run, a full-width "Start now: pick your first habit" button replaces the tile grid.
+  - *First run / no choices this month* (dark): "Doing nothing isn't standing still." / "Standing still is drifting." Doing nothing is never drawn as flat: from NOW the chart forks into a green *start now* line and a red *do nothing* line drifting down, with "the gap is your choice" between them and a countdown ("spring · 26 weeks", season varies). The lines draw in on load. On first run, a full-width "Start now: pick your first habit" button replaces the tile grid.
 - **Swipeable hero** (once there's at least one lever): scroll-snap slides with a dot indicator below; mouse drag works on desktop.
   1. *Your path* — the trajectory card above.
   2. *Streaks* — one row per lever, best streak first, top 4 shown ("+N more"). Each row: name, today status (*today ✓* green / *today?* amber when a live streak isn't banked yet / *best N* when broken), a 7-day strip (green good, red slipped, empty none; today outlined) and the streak count. A lever's day counts when its good choices outnumber its bad. Headline: "Keep them alive today." if any live streak is unbanked, "Don't break them." if all are banked, "Start a streak today." if none. Footer: longest-ever streak and which lever. Rows link to that lever's decision screen.
@@ -162,7 +162,7 @@ Jade **green** (`#12805C`, on dark `#47D7A0`) and tomato **red** (`#D93A3A`, on 
 
 The numbers exist only to choose a comparison. They are never shown.
 
-- Horizon: ~30 weeks ("summer").
+- Horizon: rolling 26 weeks, named by the season it lands in. Constant length keeps projections the same size all year (a fixed 21 June target shrank to 4 weeks in May, then jumped to 55).
 - Weight: `kg ≈ kcal saved per week × 30 / 7700 × 0.8` (0.8 ≈ metabolic adaptation; the naive 7700 kcal/kg rule overstates).
 - Exercise calories counted at 60% — trackers overestimate burn.
 - Weight comparisons: < 0.4 kg block of butter · < 1.5 bag of sugar · < 3.5 bag of potatoes · < 7 bowling ball · else suitcase.
@@ -191,7 +191,7 @@ The numbers exist only to choose a comparison. They are never shown.
 - **Getting to the decision screen fast** — home-screen widget, lock-screen widget, watch complication. The decision only works if it's one gesture away when the snack is in your hand.
 - **Prompts** for good habits (holds, bedtime): time-based nudges that open the decision screen.
 - **Automatic levers** from Health data (workouts, sleep) so they need no gesture.
-- **Horizon choice** — summer by default; let the user pick an event (holiday, birthday, race).
+- **Horizon choice** — rolling 6 months by default; optionally let the user pick an event (holiday, birthday, race).
 - **Remaining lever screens** — dessert, drink, exercise, fruit, bedtime decision variants (same component, different copy table).
 - **Tone guardrail** — keep the bad-path copy firm without tipping into shame; test with real use.
 - **Accessibility** — drag-only decision needs a VoiceOver/keyboard path (e.g. adjustable control with swipe up/down) that keeps the "move it" feel.

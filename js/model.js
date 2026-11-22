@@ -189,14 +189,14 @@ export function fmt(unit, v) {
   return String(v);
 }
 
-/* ---------- Horizon: next summer (21 June) ---------- */
+/* ---------- Horizon: a rolling ~6 months, named after the season it lands in ---------- */
+const SEASONS = ['winter', 'winter', 'spring', 'spring', 'spring', 'summer', 'summer', 'summer', 'autumn', 'autumn', 'autumn', 'winter'];
+export const HORIZON_WEEKS = 26;
 export function horizon(now = new Date()) {
-  let y = now.getFullYear();
-  if (now.getMonth() >= 5) y++; // from June on, "summer" means next year's
-  const target = new Date(y, 5, 21);
-  const span = target - now;
+  const span = HORIZON_WEEKS * 7 * DAY, target = new Date(now.getTime() + span);
   return {
-    weeks: Math.max(4, span / (7 * DAY)),
+    weeks: HORIZON_WEEKS,
+    season: SEASONS[target.getMonth()],
     ticks: [1, 2, 3].map(i => new Date(now.getTime() + span * i / 4).toLocaleString('en-GB', { month: 'short' }))
   };
 }

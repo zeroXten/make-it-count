@@ -12,6 +12,18 @@ const app = document.getElementById('app');
 let data = migrate(load());
 const persist = () => save(data);
 const H = horizon();
+/* All copy is written as "summer"; swap in the season ~6 months out (spring/summer/autumn/winter).
+   Done on the rendered DOM so every string, model copy included, follows the rolling horizon. */
+const capS = (w) => w[0].toUpperCase() + w.slice(1);
+const seasonText = (t) => H.season === 'summer' ? t : t.replace(/summer/g, H.season).replace(/Summer/g, capS(H.season));
+function seasonalise(root) {
+  if (H.season === 'summer' || !root) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n = w.nextNode(); n; n = w.nextNode()) if (/summer/i.test(n.nodeValue)) n.nodeValue = seasonText(n.nodeValue);
+  root.querySelectorAll('[aria-label],[aria-valuetext]').forEach(el => {
+    for (const at of ['aria-label', 'aria-valuetext']) { const v = el.getAttribute(at); if (v && /summer/i.test(v)) el.setAttribute(at, seasonText(v)); }
+  });
+}
 
 /* ---------- Routing (hash) ---------- */
 function route() {
@@ -305,6 +317,7 @@ function paintDecision() {
       <div>${esc(y ? c.yesText(lever.vals) : c.noText(lever.vals))}</div>
       <div class="row-start"><button class="btn-ghost" id="done" ${pend ? '' : 'tabindex="-1" disabled'}>Done</button></div></div>`;
   }
+  seasonalise(app);
 }
 
 function done() {
@@ -382,6 +395,7 @@ function formScreen() {
 function paintAddProj() {
   const [head, lines] = addPreview(form.type, form.vals, H.weeks);
   document.getElementById('addproj').innerHTML = `<div class="add-proj-head">${head}</div>` + lines.map(x => `<div class="add-proj-line">${esc(x)}</div>`).join('');
+  seasonalise(document.getElementById('addproj'));
 }
 function saveForm() {
   const name = form.name.trim() || TYPES[form.type].name;
@@ -464,6 +478,7 @@ function render() {
     formScreen();
   } else home();
   window.scrollTo(0, 0);
+  seasonalise(app);
 }
 window.addEventListener('hashchange', render);
 // Another tab changed the data: pick it up.
