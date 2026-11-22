@@ -44,6 +44,13 @@ button { font: inherit; }
 .tile-fact { font-size: 13px; color: var(--muted); }
 .tile-fact.bad { color: var(--bad); }
 .tile-add { border: 1.5px dashed #B9B3A6; background: transparent; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; }
+.btn-start { text-decoration: none; font-size: 17px; padding: 16px; }
+.hero-chart .draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.2s ease-out .2s forwards; }
+.hero-chart .draw.late { animation-delay: .7s; }
+.hero-chart .pop { opacity: 0; animation: fade .3s ease-out 1.3s forwards; }
+.hero-chart .pop.late { animation-delay: 1.8s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fade { to { opacity: 1; } }
 .footer { margin-top: auto; padding-top: 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; font-size: 13px; color: var(--muted); }
 .footer .link { font-size: 13px; color: var(--muted); }
 
@@ -92,4 +99,8 @@ input[type=range] { width: 100%; height: 32px; margin: 0; accent-color: var(--go
 .btn-primary { color: #fff; background: var(--good); }
 .btn-danger { color: var(--bad); background: transparent; border: 1px solid var(--line); }
 
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  .hero-chart .draw { stroke-dashoffset: 0; }
+  .hero-chart .pop { opacity: 1; }
+}

@@ -28,17 +28,26 @@ function spark(trend) {
 
 function hero(s) {
   if (s.state === 'empty' || s.state === 'quiet') {
-    const empty = s.state === 'empty';
+    // Doing nothing isn't flat: left alone, habits drift the wrong way. Show the fork.
+    const empty = s.state === 'empty', wk = Math.round(H.weeks);
     return `<section class="hero">
-      <div class="hero-head">${empty ? 'Pick the habits you want to move.' : 'Every choice from here moves summer-you.'}</div>
-      <svg class="hero-chart" viewBox="0 76 310 54" role="img" aria-label="Your line level with the old-you line">
-        <path d="M6 100 C 100 100, 200 99, 262 98" fill="none" stroke="#8A8F96" stroke-width="2" stroke-dasharray="6 6" stroke-linecap="round"/>
-        <path d="M6 100 C 60 99, 120 98, 150 98" fill="none" stroke="${C.goodDark}" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="150" cy="98" r="6" fill="${C.goodDark}"/>
-        <text x="266" y="102" font-size="12" fill="#B9BDC4">old you</text>
-        <text x="6" y="124" font-size="11" fill="#8A8F96">now</text><text x="236" y="124" font-size="11" fill="#8A8F96">summer</text>
+      <div class="hero-head">${empty ? 'Doing nothing isn’t standing still.' : 'Standing still is drifting.'}</div>
+      <svg class="hero-chart" viewBox="0 0 310 150" role="img" aria-label="From now, one line climbs if you start changing; the other drifts down if nothing changes. Summer is ${wk} weeks away.">
+        <path d="M14 70 C 100 68, 190 40, 262 16 L 262 118 C 190 96, 100 72, 14 70 Z" fill="#F5F3EE" opacity="0.06"/>
+        <path class="draw" pathLength="1" d="M14 70 C 100 72, 190 96, 262 118" fill="none" stroke="${C.badDark}" stroke-width="3" stroke-linecap="round"/>
+        <path class="draw late" pathLength="1" d="M14 70 C 100 68, 190 40, 262 16" fill="none" stroke="${C.goodDark}" stroke-width="4" stroke-linecap="round"/>
+        <circle class="pop" cx="262" cy="118" r="5" fill="${C.badDark}"/>
+        <circle class="pop late" cx="262" cy="16" r="6" fill="${C.goodDark}"/>
+        <text x="132" y="36" font-size="13" font-weight="600" fill="${C.goodDark}">start now</text>
+        <text x="132" y="112" font-size="13" font-weight="600" fill="${C.badDark}">do nothing</text>
+        <text x="190" y="72" font-size="11" fill="#B9BDC4">the gap is</text><text x="190" y="86" font-size="11" fill="#B9BDC4">your choice</text>
+        <circle cx="14" cy="70" r="9" fill="#F5F3EE"/><circle cx="14" cy="70" r="3.5" fill="${C.ink}"/>
+        <text x="6" y="144" font-size="11" fill="#8A8F96">now</text>
+        <text x="304" y="144" text-anchor="end" font-size="11" fill="#8A8F96">summer · ${wk} weeks</text>
       </svg>
-      <div class="hero-sub">${empty ? 'Add a lever — a snack, a drink, a workout, a bedtime. Then open it the moment you’re choosing.' : 'Open a lever the moment you’re choosing, and move NOW.'}</div>
+      <div class="hero-sub">${empty
+        ? 'Left alone, habits drift the wrong way: a little heavier, less fit, more tired each year. Which line you’re on starts with your next choice.'
+        : 'No choices made here this month, and the drift doesn’t wait. Open a lever the moment you’re choosing.'}</div>
     </section>`;
   }
   const ahead = s.state === 'ahead', acc = ahead ? C.goodDark : C.badDark;
@@ -70,7 +79,9 @@ function home() {
     <header class="row"><h1 class="brand">Make It Count</h1><button class="link" id="install" hidden>Install app</button></header>
     ${hero(heroSummary(data.levers, data.events, H.weeks))}
     ${data.levers.length ? '<div class="section-label">Tap before you choose</div>' : ''}
-    <div class="grid2">${tiles}<a class="tile tile-add" href="#/add">+ Add ${data.levers.length ? 'a' : 'your first'} lever</a></div>
+    ${data.levers.length
+      ? `<div class="grid2">${tiles}<a class="tile tile-add" href="#/add">+ Add a lever</a></div>`
+      : '<a class="btn-primary btn-start" href="#/add">Start now: pick your first habit</a>'}
     <footer class="footer">
       <span>Your data stays on this device.</span>
       <span><button class="link" id="export">Back up</button> · <button class="link" id="import">Restore</button></span>
