@@ -316,3 +316,55 @@ export function addPreview(type, v, weeks) {
   const extra = outcomes(t, v, 1, true, weeks);
   return [t.preview.head, [...t.preview.lines(v, weeks), ...extra]];
 }
+
+/* ---------- Streak: consecutive days where good choices outnumber bad ---------- */
+const dayKey = (t) => { const d = new Date(t); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+export function streakInfo(events, now = new Date()) {
+  const byDay = new Map();
+  for (const e of events) {
+    const k = dayKey(e.t), d = byDay.get(k) || { y: 0, n: 0 };
+    d[e.c]++; byDay.set(k, d);
+  }
+  const state = (t) => { const d = byDay.get(dayKey(t)); return !d ? 'none' : d.y > 0 && d.y >= d.n ? 'good' : 'bad'; };
+  const dayAt = (i) => { const d = new Date(now); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i); return d.getTime(); };
+
+  const days = [];
+  for (let i = 13; i >= 0; i--) days.push({ state: state(dayAt(i)), today: i === 0 });
+
+  const todayDone = state(dayAt(0)) === 'good';
+  let streak = 0;
+  for (let i = todayDone ? 0 : 1; state(dayAt(i)) === 'good'; i++) streak++;
+
+  let best = 0, run = 0;
+  if (events.length) {
+    const first = Math.min(...events.map(e => e.t));
+    const span = Math.ceil((dayAt(0) - first) / DAY) + 1;
+    for (let i = span; i >= 0; i--) { run = state(dayAt(i)) === 'good' ? run + 1 : 0; best = Math.max(best, run); }
+  }
+  return { streak, best, todayDone, days };
+}
+
+/* ---------- Banked: what good choices have already earned (real, not projected) ---------- */
+export function bankedSummary(levers, events) {
+  let total = 0, kcal = 0, gbp = 0, mins = 0, first = Infinity;
+  const sessions = [];
+  for (const l of levers) {
+    const t = TYPES[l.type], v = l.vals;
+    const y = events.filter(e => e.leverId === l.id && e.c === 'y');
+    if (!y.length) continue;
+    total += y.length;
+    first = Math.min(first, ...y.map(e => e.t));
+    if (t.kcal) kcal += y.length * (v.kcal || 0) * t.kcal;
+    if (t.cost) gbp += y.length * (v.cost || 0);
+    if (t.time) mins += y.length * (v.min || 0);
+    if (t.group === 'more') sessions.push(`${l.name} ×${y.length}`);
+  }
+  const kg = kcal / 7700 * 0.8, k = kgNoun(kg), hours = mins / 60, x = timeNoun(hours);
+  const chips = [
+    k && `${k} lighter`,
+    gbp >= 1 && `£${Math.round(gbp)} kept`,
+    x ? `${x} back` : hours >= 1 ? `${Math.round(hours)} hours back` : null,
+    ...sessions
+  ].filter(Boolean);
+  return { total, chips, since: total ? new Date(first) : null };
+}

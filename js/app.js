@@ -1,5 +1,5 @@
 import { load, save, uid, isValid, requestPersist } from './storage.js';
-import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview } from './model.js';
+import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview, streakInfo, bankedSummary } from './model.js';
 
 const C = { good: '#1B6B4F', bad: '#C0362C', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#7FD1AE', badDark: '#FF8A7A' };
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -68,6 +68,93 @@ function hero(s) {
   </section>`;
 }
 
+/* ---------- Hero slides 2 & 3: streak, banked ---------- */
+function streakSlide() {
+  const s = streakInfo(data.events), n = s.streak;
+  const head = n === 0 ? 'Start a streak today.' : s.todayDone ? 'Don’t break it.' : 'Keep it alive today.';
+  const sub = n === 0
+    ? 'Any day where your good choices outnumber the bad counts.'
+    : `${s.todayDone ? 'Today’s banked.' : 'One good choice today keeps it going.'} Best so far: ${s.best} day${s.best === 1 ? '' : 's'}.`;
+  const label = { good: 'good day', bad: 'slipped', none: 'nothing logged' };
+  return `<section class="hero">
+    <div class="hero-head">${head}</div>
+    ${n ? `<div class="big-stat"><span class="big-num">${n}</span><span class="big-unit">day${n === 1 ? '' : 's'} in a row</span></div>` : ''}
+    <div class="strip" role="img" aria-label="Last 14 days: ${s.days.map(d => label[d.state]).join(', ')}">
+      ${s.days.map(d => `<span class="sd ${d.state}${d.today ? ' today' : ''}"></span>`).join('')}
+    </div>
+    <div class="strip-axis"><span>2 weeks ago</span><span>today</span></div>
+    <div class="hero-sub">${sub}</div>
+  </section>`;
+}
+
+function bankedSlide() {
+  const b = bankedSummary(data.levers, data.events);
+  if (!b.total) return `<section class="hero">
+    <div class="hero-head">Nothing banked yet.</div>
+    <div class="hero-sub">Every good choice lands here and stays: real, not projected. Your next one is the first.</div>
+  </section>`;
+  const since = b.since.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return `<section class="hero">
+    <div class="hero-head">Already banked.</div>
+    <div class="big-stat"><span class="big-num">${b.total}</span><span class="big-unit">good choice${b.total === 1 ? '' : 's'}</span></div>
+    ${b.chips.length ? `<div class="hero-sub">That’s already:</div><div class="chips" style="color:${C.goodDark}">${b.chips.map(c => `<span class="chip">${esc(c)}</span>`).join('')}</div>` : ''}
+    <div class="hero-sub">Real, not projected. Yours since ${since}, whatever happens next.</div>
+  </section>`;
+}
+
+/* Swipeable hero: scroll-snap slides + dot indicator. */
+let heroIndex = 0;
+const SLIDE_NAMES = ['Your path', 'Streak', 'Banked'];
+function heroCarousel(slides) {
+  if (slides.length === 1) return slides[0];
+  return `<div class="carousel" aria-roledescription="carousel" aria-label="Your progress">
+    <div class="slides" id="slides">${slides.map((h, i) => `<div class="slide" role="group" aria-roledescription="slide" aria-label="${SLIDE_NAMES[i]}, ${i + 1} of ${slides.length}">${h}</div>`).join('')}</div>
+    <div class="dots">${slides.map((_, i) => `<button class="dot${i === heroIndex ? ' on' : ''}" data-slide="${i}" aria-label="Show ${SLIDE_NAMES[i]}"${i === heroIndex ? ' aria-current="true"' : ''}></button>`).join('')}</div>
+  </div>`;
+}
+const slideStep = (el) => el.firstElementChild.offsetWidth + parseFloat(getComputedStyle(el).columnGap || 0);
+function wireCarousel() {
+  const el = document.getElementById('slides');
+  if (!el) return;
+  heroIndex = Math.min(heroIndex, el.children.length - 1);
+  el.scrollLeft = heroIndex * slideStep(el);
+  el.addEventListener('scroll', () => {
+    const i = Math.round(el.scrollLeft / slideStep(el));
+    if (i === heroIndex) return;
+    heroIndex = i;
+    document.querySelectorAll('.dot').forEach((d, j) => { d.classList.toggle('on', j === i); d.toggleAttribute('aria-current', j === i); });
+  }, { passive: true });
+  // Touch and trackpads swipe natively; give a mouse the same drag-to-swipe.
+  let drag = null;
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    drag = { x: e.clientX, left: el.scrollLeft, moved: false };
+    el.classList.add('dragging');
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x;
+    if (Math.abs(dx) > 4) drag.moved = true;
+    el.scrollLeft = drag.left - dx;
+  });
+  const end = () => {
+    if (!drag) return;
+    const step = slideStep(el), dx = el.scrollLeft - drag.left;
+    // A short flick is enough to move one slide.
+    const target = Math.abs(dx) > step * 0.15 ? Math.round(drag.left / step) + Math.sign(dx) : Math.round(drag.left / step);
+    el.classList.remove('dragging');
+    drag = null;
+    showSlide(Math.max(0, Math.min(el.children.length - 1, target)));
+  };
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+}
+function showSlide(i) {
+  const el = document.getElementById('slides');
+  el.scrollTo({ left: i * slideStep(el), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+
 function home() {
   const tiles = data.levers.map(l => {
     const t = tileInfo(l, data.events);
@@ -77,7 +164,7 @@ function home() {
   }).join('');
   app.innerHTML = `<main class="screen">
     <header class="row"><h1 class="brand">Make It Count</h1><button class="link" id="install" hidden>Install app</button></header>
-    ${hero(heroSummary(data.levers, data.events, H.weeks))}
+    ${heroCarousel(data.levers.length ? [hero(heroSummary(data.levers, data.events, H.weeks)), streakSlide(), bankedSlide()] : [hero(heroSummary(data.levers, data.events, H.weeks))])}
     ${data.levers.length ? '<div class="section-label">Tap before you choose</div>' : ''}
     ${data.levers.length
       ? `<div class="grid2">${tiles}<a class="tile tile-add" href="#/add">+ Add a lever</a></div>`
@@ -89,6 +176,7 @@ function home() {
     </footer>
   </main>`;
   updateInstallButton();
+  wireCarousel();
 }
 
 /* ================= Decision ================= */
@@ -309,6 +397,8 @@ app.addEventListener('click', async (e) => {
   if (id === 'export') return exportData();
   if (id === 'import') return document.getElementById('import-file').click();
   if (id === 'install' && installEvt) { installEvt.prompt(); await installEvt.userChoice; installEvt = null; return updateInstallButton(); }
+  const dot = e.target.closest('[data-slide]');
+  if (dot) return showSlide(Number(dot.dataset.slide));
   const t = e.target.closest('[data-type]');
   if (t && form && !form.id) { form = { type: t.dataset.type, name: TYPES[t.dataset.type].name, vals: defaults(t.dataset.type) }; formScreen(); }
 });

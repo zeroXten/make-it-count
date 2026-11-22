@@ -47,6 +47,10 @@ That sentence is the product. Every design decision should be tested against it.
   - *Ahead* (dark): "You're pulling away from the old you." Green line climbs away from dashed old-you; shaded gap labelled "that gap is you". "By summer, that gap is:" + chips (*lighter*, *a weekend away*, *stronger*).
   - *Slipping* (deep red): "You're drifting back to the old you." Line rose then falls back; "the gap is closing". "By summer, you're throwing away:" + chips.
   - *First run / no choices this month* (dark): "Doing nothing isn't standing still." / "Standing still is drifting." Doing nothing is never drawn as flat: from NOW the chart forks into a green *start now* line and a red *do nothing* line drifting down, with "the gap is your choice" between them and a countdown ("summer · 30 weeks"). The lines draw in on load. On first run, a full-width "Start now: pick your first habit" button replaces the tile grid.
+- **Swipeable hero** (once there's at least one lever): scroll-snap slides with a dot indicator below; mouse drag works on desktop.
+  1. *Your path* — the trajectory card above.
+  2. *Streak* — "Don't break it." / "Keep it alive today." Big count of consecutive days where good choices outnumber bad, a 14-day strip (green good, red slipped, empty none; today outlined), and best-ever streak.
+  3. *Banked* — "Already banked." Total good choices plus what they've already earned (real, not projected): weight comparison, £ kept, evenings back, and sessions per build-up lever.
 - **Lever tiles** (2-col grid). Each tile: name, a mini line vs dashed old-you (green climbing / grey flat / red falling), and one concrete fact ("9 skipped this month", "Less than last month" in red). No abstract status words ("ahead of usual" was rejected).
 - Tapping a tile opens its decision screen. Last tile: "+ Add a lever".
 
