@@ -110,20 +110,20 @@ Outcome lines — snack good: *Clothes fit better. More energy. Less puffed on t
 - Live projection card: "Skip half of them, and summer-you is… **a bag of sugar lighter** / **a nice meal out richer**".
 - Note: "Typical values to start. Close enough is fine."
 
-Types are generic; the user names each lever (e.g. an Exercise lever called "Bike ride"). They fall into two groups shown in the picker:
+Ranges allow heavy-but-real use (several times a day for frequent habits). Types are generic; the user names each lever (e.g. an Exercise lever called "Bike ride"). They fall into two groups shown in the picker:
 
 | Group | Type | Defaults | Summer outcome |
 |---|---|---|---|
-| Cut back | Snacks | 100 kcal, £0.50, 7/week | weight, money |
-| Cut back | Sweets & desserts | 250 kcal, £0, 5/week | weight, money |
-| Cut back | Alcohol | 180 kcal, £5, 6 drinks/week | weight, money |
-| Cut back | Takeaways | +500 kcal, +£12 vs cooking, 2/week | weight, money |
-| Cut back | Smoking & vaping | £0.60 each, 70/week | healthier, money |
-| Cut back | Screen time | 20 min each, 14/week | evenings back |
-| Cut back | Spending | £25 each, 2/week | money |
-| Build up | Exercise | 30 min, 200 kcal (0 if unknown), 2/week | fitter, weight |
+| Cut back | Snacks | 150 kcal, £0.75, 14/week (up to 42) | weight, money |
+| Cut back | Sweets & desserts | 250 kcal, £0, 5/week (up to 28) | weight, money |
+| Cut back | Alcohol | 180 kcal, £5, 10 drinks/week (up to 70) | weight, money |
+| Cut back | Takeaways | +500 kcal, +£12 vs cooking, 2/week (up to 21) | weight, money |
+| Cut back | Smoking & vaping | £0.80 each, 70/week (up to 420) | healthier, money |
+| Cut back | Screen time | 20 min each, 28/week (up to 140) | evenings back (capped at 8 h/day) |
+| Cut back | Spending | £25 each (up to £500), 3/week | money |
+| Build up | Exercise | 30 min (up to 4 h), 200 kcal (up to 2000; 0 if unknown), 2/week | fitter, weight |
 | Build up | Sleep | +45 min per early night, 1/week | sharper |
-| Build up | Fruit & veg | 7 portions/week | more energy |
+| Build up | Fruit & veg | 14 portions/week (up to 70) | more energy |
 | Build up | Learning | 20 min, 3/week | better at it |
 | Build up | Mindfulness | 10 min, 3/week | calmer |
 

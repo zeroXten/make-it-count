@@ -19,7 +19,7 @@ export const TYPES = {
   /* ----- Cut back ----- */
   snack: {
     group: 'less', label: 'Snacks', name: 'Snack', kcal: 1, cost: true,
-    fields: [['kcal', 'Calories each', 0, 600, 10, 100, 'kcal'], ['cost', 'Cost each', 0, 5, 0.1, 0.5, 'gbp'], ['usual', 'Usually, per week', 0, 21, 1, 7, 'wk']],
+    fields: [['kcal', 'Calories each', 0, 800, 10, 150, 'kcal'], ['cost', 'Cost each', 0, 10, 0.05, 0.75, 'gbp'], ['usual', 'Usually, per week', 0, 42, 1, 14, 'wk']],
     copy: { q: 'Snack?', top: 'lighter', bot: 'heavier', ...SKIP_UP, small: ['a little lighter', 'a little heavier'],
       goodSub: 'Clothes fit better. More energy. Less puffed on the stairs.',
       badSub: 'Tighter jeans. Less energy. Same summer as last year, only heavier.',
@@ -29,7 +29,7 @@ export const TYPES = {
   },
   sweets: {
     group: 'less', label: 'Sweets & desserts', name: 'Sweet treats', kcal: 1, cost: true,
-    fields: [['kcal', 'Calories each', 0, 800, 10, 250, 'kcal'], ['cost', 'Cost each', 0, 8, 0.1, 0, 'gbp'], ['usual', 'Usually, per week', 0, 14, 1, 5, 'wk']],
+    fields: [['kcal', 'Calories each', 0, 1000, 10, 250, 'kcal'], ['cost', 'Cost each', 0, 10, 0.1, 0, 'gbp'], ['usual', 'Usually, per week', 0, 28, 1, 5, 'wk']],
     copy: { q: 'Sweet treat?', top: 'lighter', bot: 'heavier', ...SKIP_UP, small: ['a little lighter', 'a little heavier'],
       goodSub: 'Clothes fit better. Steadier energy. No sugar crash.',
       badSub: 'Tighter jeans. Sugar crashes. Same summer as last year, only heavier.',
@@ -39,7 +39,7 @@ export const TYPES = {
   },
   alcohol: {
     group: 'less', label: 'Alcohol', name: 'Alcohol', kcal: 1, cost: true,
-    fields: [['kcal', 'Calories per drink', 0, 400, 10, 180, 'kcal'], ['cost', 'Cost per drink', 0, 15, 0.1, 5, 'gbp'], ['usual', 'Drinks, usually per week', 0, 40, 1, 6, 'wk']],
+    fields: [['kcal', 'Calories per drink', 0, 600, 10, 180, 'kcal'], ['cost', 'Cost per drink', 0, 20, 0.1, 5, 'gbp'], ['usual', 'Drinks, usually per week', 0, 70, 1, 10, 'wk']],
     copy: { q: 'Drink?', top: 'lighter', bot: 'heavier', up: '↑ not this one', down: '↓ have it', small: ['a little lighter', 'a little heavier'],
       goodSub: 'Better sleep. Clearer mornings. Money in your pocket.',
       badSub: 'Heavier. Foggier mornings. Money gone.',
@@ -49,7 +49,7 @@ export const TYPES = {
   },
   takeaway: {
     group: 'less', label: 'Takeaways', name: 'Takeaway', kcal: 1, cost: true,
-    fields: [['kcal', 'Extra calories vs cooking', 0, 2000, 50, 500, 'kcal'], ['cost', 'Extra cost vs cooking', 0, 60, 1, 12, 'gbp'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
+    fields: [['kcal', 'Extra calories vs cooking', 0, 2000, 50, 500, 'kcal'], ['cost', 'Extra cost vs cooking', 0, 60, 1, 12, 'gbp'], ['usual', 'Usually, per week', 0, 21, 1, 2, 'wk']],
     copy: { q: 'Takeaway?', top: 'lighter', bot: 'heavier', up: '↑ cook instead', down: '↓ order it', small: ['a little lighter', 'a little heavier'],
       goodSub: 'Lighter. Richer. Feeling better for it.',
       badSub: 'Heavier. Poorer. Sluggish evenings.',
@@ -59,7 +59,7 @@ export const TYPES = {
   },
   smoking: {
     group: 'less', label: 'Smoking & vaping', name: 'Smoking', cost: true,
-    fields: [['cost', 'Cost each (cigarette, vape session…)', 0, 2, 0.05, 0.6, 'gbp'], ['usual', 'Usually, per week', 0, 280, 5, 70, 'wk']],
+    fields: [['cost', 'Cost each (cigarette, vape session…)', 0, 2, 0.05, 0.8, 'gbp'], ['usual', 'Usually, per week', 0, 420, 5, 70, 'wk']],
     copy: { q: 'Smoke?', top: 'healthier', bot: 'less healthy', ...SKIP_UP, small: ['a little healthier', 'a little less healthy'],
       ...fitLevels(['healthier', 'properly healthier'], ['wheezier', 'short of breath']),
       goodSub: 'Easier breathing. Better taste and smell. Money kept.',
@@ -70,7 +70,7 @@ export const TYPES = {
   },
   screen: {
     group: 'less', label: 'Screen time', name: 'Scrolling', time: true,
-    fields: [['min', 'Minutes each time', 5, 180, 5, 20, 'min'], ['usual', 'Times, usually per week', 0, 70, 1, 14, 'wk']],
+    fields: [['min', 'Minutes each time', 5, 180, 5, 20, 'min'], ['usual', 'Times, usually per week', 0, 140, 1, 28, 'wk']],
     copy: { q: null, top: 'more time', bot: 'less time', up: '↑ put it down', down: '↓ carry on', small: ['a little time back', 'a little time lost'],
       goodSub: 'Time for the things you keep putting off. Better sleep. A calmer head.',
       badSub: 'Evenings gone to the feed, with nothing to show for them.',
@@ -80,7 +80,7 @@ export const TYPES = {
   },
   spending: {
     group: 'less', label: 'Spending', name: 'Impulse buys', cost: true,
-    fields: [['cost', 'Typical cost', 0, 300, 5, 25, 'gbp'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
+    fields: [['cost', 'Typical cost', 0, 500, 5, 25, 'gbp'], ['usual', 'Usually, per week', 0, 21, 1, 3, 'wk']],
     copy: { q: 'Buy it?', top: 'richer', bot: 'poorer', up: '↑ leave it', down: '↓ buy it', small: ['a little richer', 'a little poorer'],
       goodSub: 'Money for things you actually want. Less clutter.',
       badSub: 'Money gone on things you’ll forget you bought.',
@@ -92,7 +92,7 @@ export const TYPES = {
   /* ----- Build up ----- */
   exercise: {
     group: 'more', label: 'Exercise', name: 'Exercise', kcal: 0.6, // trackers overestimate burn
-    fields: [['min', 'Minutes each', 1, 120, 1, 30, 'min'], ['kcal', 'Calories burned (0 if not sure)', 0, 800, 10, 200, 'kcal'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
+    fields: [['min', 'Minutes each', 5, 240, 5, 30, 'min'], ['kcal', 'Calories burned (0 if not sure)', 0, 2000, 10, 200, 'kcal'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
     copy: { q: null, top: 'fitter', bot: 'less fit', ...DO_UP,
       ...fitLevels(['fitter', 'properly fit'], ['less fit', 'back to where you started']),
       goodSub: 'More energy. A stronger body. What was hard feels easy.',
@@ -104,7 +104,7 @@ export const TYPES = {
   },
   sleep: {
     group: 'more', label: 'Sleep', name: 'Sleep',
-    fields: [['gain', 'Extra sleep per early night', 15, 120, 5, 45, 'min'], ['usual', 'Early nights now, per week', 0, 7, 1, 1, 'wk']],
+    fields: [['gain', 'Extra sleep per early night', 15, 180, 5, 45, 'min'], ['usual', 'Early nights now, per week', 0, 7, 1, 1, 'wk']],
     copy: { q: 'Bed now?', top: 'sharper', bot: 'foggier', up: '↑ go to bed', down: '↓ stay up',
       ...fitLevels(['sharper', 'properly rested'], ['foggier', 'running on fumes']),
       goodSub: 'Clearer mornings. Steadier moods. Better days.',
@@ -119,7 +119,7 @@ export const TYPES = {
   },
   fruit: {
     group: 'more', label: 'Fruit & veg', name: 'Fruit & veg',
-    fields: [['usual', 'Portions a week now', 0, 35, 1, 7, 'n']],
+    fields: [['usual', 'Portions a week now', 0, 70, 1, 14, 'n']],
     copy: { q: 'Fruit or veg instead?', top: 'more energy', bot: 'less energy', up: '↑ have some', down: '↓ skip it',
       ...fitLevels(['brighter', 'properly well'], ['flat', 'running on empty']),
       goodSub: 'More energy in the afternoons. Better skin. Fewer colds.',
@@ -131,7 +131,7 @@ export const TYPES = {
   },
   learning: {
     group: 'more', label: 'Learning', name: 'Learning',
-    fields: [['min', 'Minutes each', 5, 120, 5, 20, 'min'], ['usual', 'Usually, per week', 0, 14, 1, 3, 'wk']],
+    fields: [['min', 'Minutes each', 5, 180, 5, 20, 'min'], ['usual', 'Usually, per week', 0, 21, 1, 3, 'wk']],
     copy: { q: null, top: 'more skilled', bot: 'rustier', ...DO_UP,
       ...fitLevels(['better at it', 'properly good at it'], ['rusty', 'back to where you started']),
       goodSub: 'What was hard comes easily. Something to show for the year.',
@@ -143,7 +143,7 @@ export const TYPES = {
   },
   mindfulness: {
     group: 'more', label: 'Mindfulness', name: 'Meditation',
-    fields: [['min', 'Minutes each', 1, 60, 1, 10, 'min'], ['usual', 'Usually, per week', 0, 14, 1, 3, 'wk']],
+    fields: [['min', 'Minutes each', 1, 60, 1, 10, 'min'], ['usual', 'Usually, per week', 0, 21, 1, 3, 'wk']],
     copy: { q: null, top: 'calmer', bot: 'more frazzled', ...DO_UP,
       ...fitLevels(['calmer', 'properly calm'], ['more frazzled', 'frazzled']),
       goodSub: 'Steadier. Less reactive. Better sleep.',
@@ -222,7 +222,9 @@ function moneyNoun(gbp) {
 function timeNoun(hours) { // counted in evenings (~3 free hours each)
   if (hours < 1.5) return null;
   const ev = hours / 3;
-  return ev < 1.5 ? 'an evening' : `${Math.round(ev)} evenings`;
+  if (ev < 1.5) return 'an evening';
+  if (ev <= 90) return `${Math.round(ev)} evenings`;
+  return 'months of evenings';
 }
 const pickLevel = (arr, m) => { for (const [t, w] of arr) if (m <= t) return w; return arr[arr.length - 1][1]; };
 const andList = (a) => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
@@ -232,7 +234,7 @@ function outcomes(t, v, perWeek, good, weeks) {
   const parts = [];
   if (t.kcal) { const k = kgNoun(kgOf(perWeek * (v.kcal || 0) * t.kcal, weeks)); if (k) parts.push(`${k} ${good ? 'lighter' : 'heavier'}`); }
   if (t.cost) { const g = moneyNoun(perWeek * (v.cost || 0) * weeks); if (g) parts.push(`${g} ${good ? 'richer' : 'poorer'}`); }
-  if (t.time) { const x = timeNoun(perWeek * (v.min || 0) * weeks / 60); if (x) parts.push(`${x} ${good ? 'back' : 'lost'}`); }
+  if (t.time) { const x = timeNoun(Math.min(perWeek * (v.min || 0), 56 * 60) * weeks / 60); if (x) parts.push(`${x} ${good ? 'back' : 'lost'}`); }
   return parts;
 }
 /* A full drag = cutting out every usual occurrence, or two extra sessions a week. */
@@ -290,7 +292,7 @@ export function heroSummary(levers, events, weeks) {
       const perWeek = count / 4;
       if (t.kcal) b.kcal += perWeek * (v.kcal || 0) * t.kcal;
       if (t.cost) b.gbp += perWeek * (v.cost || 0) * weeks;
-      if (t.time) b.hours += perWeek * (v.min || 0) * weeks / 60;
+      if (t.time) b.hours += Math.min(perWeek * (v.min || 0), 56 * 60) * weeks / 60;
       if (t.copy.chip) b.q.add(t.copy.chip[i]);
     }
   }
