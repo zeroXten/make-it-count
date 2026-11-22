@@ -297,7 +297,8 @@ async function importData(file) {
 let installEvt = null;
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvt = e; updateInstallButton(); });
 window.addEventListener('appinstalled', () => { installEvt = null; updateInstallButton(); });
-function updateInstallButton() { const b = document.getElementById('install'); if (b) b.hidden = !installEvt; }
+const isInstalled = () => matchMedia('(display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui), (display-mode: window-controls-overlay)').matches || navigator.standalone === true;
+function updateInstallButton() { const b = document.getElementById('install'); if (b) b.hidden = !installEvt || isInstalled(); }
 
 /* ================= Events & render ================= */
 app.addEventListener('click', async (e) => {
