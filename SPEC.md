@@ -88,6 +88,18 @@ The core interaction. One per lever (snack and stance holds shown).
 - **Done** logs the choice (haptic: short buzz for good, double-buzz for bad) and returns home. Leaving the screen without Done logs nothing.
 - No tap alternative for the decision.
 
+#### 5.2.3 States (strict)
+
+Only three on-screen states, and every element (headline, line, panel) follows the same one:
+
+| State | When | Headline | Line end | Panel |
+|---|---|---|---|---|
+| Rest | NOW within the centre dead zone, or released there (snaps to centre) | the question ("Snack?") | your current pace | "On your current pace, by summer:" coloured by that pace |
+| Up | dragged clearly up | "You just changed summer." (green) | above old-you | green, better outcome |
+| Down | dragged clearly down | "You just changed summer. For the worse." (red) | below old-you | red, worse outcome |
+
+Dragging against your current pace brings the line back to old-you by the edge of the dead zone, so it's always on the side the headline describes. Enter/exit thresholds differ (hysteresis) so a wobbling finger can't flicker between states; projection wording only steps after a clear move.
+
 #### 5.2.2 Copy
 
 | State | Snack | Stance holds |

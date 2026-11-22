@@ -199,15 +199,22 @@ const pending = () => (dec && dec.pend) || null;
 const hyst = (cur, x, enter, exit) => cur === 'up' ? (x < -enter ? 'down' : x < exit ? 'rest' : 'up')
   : cur === 'down' ? (x > enter ? 'up' : x > -exit ? 'rest' : 'down')
   : (x > enter ? 'up' : x < -enter ? 'down' : 'rest');
-function settle(e, B) {
-  dec.zone = hyst(dec.zone || 'rest', dec.v, 0.18, 0.05);   // headline: rest / changed / for the worse
-  // colour: flat / green / red. In the centre dead zone it reflects your current pace (B), like the panel.
-  dec.tone = hyst(dec.tone || 'rest', dec.zone === 'rest' ? B : e, 0.16, 0.02);
+/* Three states only: rest (centre), up, down. Hysteresis stops a wobbling finger flipping between them. */
+const DEAD = 0.1;   // inside this, NOW is "at rest"; the line has crossed old-you by the time you leave it
+function settle() {
+  dec.zone = hyst(dec.zone || 'rest', dec.v, 0.18, DEAD);
   const p = hyst(dec.pend === 'y' ? 'up' : dec.pend === 'n' ? 'down' : 'rest', dec.v, 0.6, 0.47);
   dec.pend = p === 'up' ? 'y' : p === 'down' ? 'n' : null;  // Done card
-  // Projection wording: at rest it's exactly your current pace; otherwise it only updates after a clear move.
-  if (dec.zone === 'rest') dec.pe = B;
-  else if (dec.pe === undefined || Math.abs(e - dec.pe) > 0.12 || Math.abs(e) > 0.97) dec.pe = e;
+}
+/* Where summer-you ends up for a given drag v, starting from your current pace B.
+   Moving with your pace: straight from B towards ±1. Moving against it: back to old-you
+   by the edge of the dead zone, then on to the other side, so the line is always on the
+   side the headline and panel describe. */
+function summerAt(v, B) {
+  const s = Math.sign(v) || 1, a = Math.abs(v);
+  if (s * B >= 0) return B + v * (1 - Math.abs(B));
+  if (a <= DEAD) return B * (1 - a / DEAD);
+  return s * (a - DEAD) / (1 - DEAD);
 }
 
 function decisionShell(lever) {
@@ -231,23 +238,21 @@ function decisionShell(lever) {
 
 function decisionModel(lever) {
   const c = copyFor(lever), B = leverBase(lever, data.events);
-  const v = dec.v;
-  const e = v >= 0 ? B + v * (1 - B) : B + v * (1 + B); // effective summer position (drives the geometry, smoothly)
-  settle(e, B);
+  const v = dec.v, e = summerAt(v, B);
+  settle();
   const ch = pending(), idle = dec.zone === 'rest';
-  const mag = Math.abs(e), good = dec.tone === 'up', flat = dec.tone === 'rest';
+  // One state drives everything: at rest it's your current pace (B); otherwise it's the drag direction.
+  const sign = idle ? (Math.abs(B) < 0.08 ? 0 : Math.sign(B)) : (dec.zone === 'up' ? 1 : -1);
+  const good = sign > 0, flat = sign === 0, mag = Math.abs(e);
   const ny = Math.round(150 - v * 50), ey = Math.round(150 - e * 118), eyb = Math.round(150 - B * 118);
   const col = flat ? C.muted : (good ? C.good : C.bad);
-  // Headline follows the drag direction; when the outcome is still on the other side of old-you it says so,
-  // so it never contradicts the projection panel ("gave some back" while still lighter, etc).
   const head = ch === 'y' ? c.yesHead : ch === 'n' ? c.noHead : idle ? c.q
-    : dec.zone === 'up' ? (dec.tone === 'down' ? 'You just clawed some of summer back.' : dec.tone === 'rest' ? 'You just clawed summer back.' : 'You just changed summer.')
-    : (dec.tone === 'up' ? 'You just gave some of summer back.' : dec.tone === 'rest' ? 'You just threw summer away.' : 'You just changed summer. For the worse.');
-  const headCol = (ch === 'n' || (!ch && dec.zone === 'down')) ? C.bad : (ch === 'y' || (!ch && dec.zone === 'up')) ? C.good : C.ink;
-  // Projection always agrees with the colour state (tone), so headline, chart and panel never contradict.
-  const p = flat
-    ? (idle ? projection(lever, 0, H.weeks) : { text: 'You, back where you started.', sub: '' })
-    : projection(lever, (good ? 1 : -1) * Math.max(Math.abs(dec.pe), 0.1), H.weeks);
+    : dec.zone === 'up' ? 'You just changed summer.' : 'You just changed summer. For the worse.';
+  const headCol = idle ? C.ink : good ? C.good : C.bad;
+  // Wording only steps after a clear move, so it can't flicker at a band edge.
+  if (idle) dec.pe = undefined;
+  else if (dec.pe === undefined || Math.abs(mag - dec.pe) > 0.12 || mag > 0.97) dec.pe = mag;
+  const p = flat ? projection(lever, 0, H.weeks) : projection(lever, sign * Math.max(idle ? Math.abs(B) : dec.pe, 0.1), H.weeks);
   return { c, B, v, idle, e, mag, good, flat, ny, ey, eyb, col, head, headCol, p,
     line: `M40 ${ny} C 120 ${ny}, 210 ${Math.round((ny + ey) / 2)}, 300 ${ey}`,
     base: `M40 150 C 120 150, 210 ${Math.round((150 + eyb) / 2)}, 300 ${eyb}`,
@@ -311,7 +316,7 @@ function done() {
 }
 function release() { // NOW stays where you leave it; nothing is logged until Done
   // Let go near the centre and it settles exactly at the centre: back to "on your current pace".
-  if (Math.abs(dec.v) < 0.18) { dec.v = 0; dec.zone = 'rest'; dec.tone = undefined; dec.pend = null; }
+  if (dec.zone === 'rest' || Math.abs(dec.v) < 0.18) { dec.v = 0; dec.zone = 'rest'; dec.pend = null; }
   paintDecision();
   const card = document.querySelector('#result .result:not(.placeholder)');
   if (card) card.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
