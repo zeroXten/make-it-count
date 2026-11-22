@@ -344,6 +344,13 @@ export function streakInfo(events, now = new Date()) {
   return { streak, best, todayDone, days };
 }
 
+/* Per-lever streaks, best first: same rule, counted on each lever's own choices. */
+export function leverStreaks(levers, events, now = new Date()) {
+  return levers
+    .map(lever => ({ lever, ...streakInfo(events.filter(e => e.leverId === lever.id), now) }))
+    .sort((a, b) => b.streak - a.streak || b.best - a.best || a.lever.name.localeCompare(b.lever.name));
+}
+
 /* ---------- Banked: what good choices have already earned (real, not projected) ---------- */
 export function bankedSummary(levers, events) {
   let total = 0, kcal = 0, gbp = 0, mins = 0, first = Infinity;

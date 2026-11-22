@@ -1,5 +1,5 @@
 import { load, save, uid, isValid, requestPersist } from './storage.js';
-import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview, streakInfo, bankedSummary } from './model.js';
+import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview, streakInfo, leverStreaks, bankedSummary } from './model.js';
 
 const C = { good: '#1B6B4F', bad: '#C0362C', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#7FD1AE', badDark: '#FF8A7A' };
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -69,21 +69,27 @@ function hero(s) {
 }
 
 /* ---------- Hero slides 2 & 3: streak, banked ---------- */
+const STREAK_ROWS = 4;
 function streakSlide() {
-  const s = streakInfo(data.events), n = s.streak;
-  const head = n === 0 ? 'Start a streak today.' : s.todayDone ? 'Don’t break it.' : 'Keep it alive today.';
-  const sub = n === 0
-    ? 'Any day where your good choices outnumber the bad counts.'
-    : `${s.todayDone ? 'Today’s banked.' : 'One good choice today keeps it going.'} Best so far: ${s.best} day${s.best === 1 ? '' : 's'}.`;
+  const all = leverStreaks(data.levers, data.events);
+  const rows = all.slice(0, STREAK_ROWS), more = all.length - rows.length;
+  const alive = all.filter(r => r.streak > 0), atRisk = alive.filter(r => !r.todayDone);
+  const head = !alive.length ? 'Start a streak today.' : atRisk.length ? 'Keep them alive today.' : 'Don’t break them.';
+  const champ = all.reduce((m, r) => (r.best > (m ? m.best : 0) ? r : m), null);
   const label = { good: 'good day', bad: 'slipped', none: 'nothing logged' };
+  const row = (r) => {
+    const days = r.days.slice(-7), n = r.streak;
+    const status = r.todayDone ? 'today ✓' : n ? 'today?' : r.best ? `best ${r.best}` : 'not started';
+    return `<a class="ls-row" href="#/lever/${r.lever.id}" aria-label="${esc(r.lever.name)}: ${n} day streak, ${r.todayDone ? 'done today' : 'not yet today'}. Last 7 days: ${days.map(d => label[d.state]).join(', ')}">
+      <span class="ls-name"><b>${esc(r.lever.name)}</b><span class="ls-status ${r.todayDone ? 'done' : n ? 'risk' : ''}">${status}</span></span>
+      <span class="strip ls-strip" aria-hidden="true">${days.map(d => `<span class="sd ${d.state}${d.today ? ' today' : ''}"></span>`).join('')}</span>
+      <span class="ls-num ${n ? '' : 'zero'}">${n}<small>day${n === 1 ? '' : 's'}</small></span>
+    </a>`;
+  };
   return `<section class="hero">
     <div class="hero-head">${head}</div>
-    ${n ? `<div class="big-stat"><span class="big-num">${n}</span><span class="big-unit">day${n === 1 ? '' : 's'} in a row</span></div>` : ''}
-    <div class="strip" role="img" aria-label="Last 14 days: ${s.days.map(d => label[d.state]).join(', ')}">
-      ${s.days.map(d => `<span class="sd ${d.state}${d.today ? ' today' : ''}"></span>`).join('')}
-    </div>
-    <div class="strip-axis"><span>2 weeks ago</span><span>today</span></div>
-    <div class="hero-sub">${sub}</div>
+    <div class="ls-list">${rows.map(row).join('')}</div>
+    <div class="hero-sub">${more > 0 ? `+${more} more · ` : ''}${champ ? `Longest ever: ${esc(champ.lever.name)}, ${champ.best} day${champ.best === 1 ? '' : 's'}.` : 'A day counts when good choices outnumber bad on that habit.'}</div>
   </section>`;
 }
 
@@ -247,22 +253,22 @@ function paintDecision() {
     <circle cx="40" cy="${m.ny}" r="8" fill="${C.ink}"/>
     <text x="40" y="${m.ny - 30}" text-anchor="middle" class="t-display" font-size="13" fill="${C.ink}">NOW</text>`;
 
+  // Only touch the panels below when their content actually changes: no repaint churn mid-drag.
   const proj = document.getElementById('proj');
-  proj.className = 'proj ' + (m.flat ? '' : m.good ? 'good' : 'bad');
-  proj.innerHTML = `<div class="proj-label">${m.projLabel}</div><div class="proj-text">${esc(m.p.text)}</div>${m.p.sub ? `<div class="proj-sub">${esc(m.p.sub)}</div>` : ''}`;
+  const projClass = 'proj ' + (m.flat ? '' : m.good ? 'good' : 'bad');
+  const projHtml = `<div class="proj-label">${m.projLabel}</div><div class="proj-text">${esc(m.p.text)}</div>${m.p.sub ? `<div class="proj-sub">${esc(m.p.sub)}</div>` : ''}`;
+  if (proj.className !== projClass) proj.className = projClass;
+  if (proj.dataset.html !== projHtml) { proj.dataset.html = projHtml; proj.innerHTML = projHtml; }
 
-  const res = document.getElementById('result'), pend = pending(), state = pend || '';
+  // The result card always occupies its space (hidden until pending), so the page never
+  // changes height or scrolls under your finger while you drag.
+  const res = document.getElementById('result'), pend = pending(), state = pend || 'none';
   if (res.dataset.state !== state) {
-    const first = !res.dataset.state;
     res.dataset.state = state;
-    if (!pend) { res.innerHTML = ''; }
-    else {
-      const y = pend === 'y';
-      res.innerHTML = `<div class="result ${y ? 'good' : 'bad'}">
-        <div>${esc(y ? c.yesText(lever.vals) : c.noText(lever.vals))}</div>
-        <div class="row-start"><button class="btn-ghost" id="done">Done</button></div></div>`;
-      if (first) res.firstElementChild.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
-    }
+    const y = pend !== 'n';
+    res.innerHTML = `<div class="result ${pend ? (y ? 'good' : 'bad') : 'placeholder'}" ${pend ? '' : 'aria-hidden="true"'}>
+      <div>${esc(y ? c.yesText(lever.vals) : c.noText(lever.vals))}</div>
+      <div class="row-start"><button class="btn-ghost" id="done" ${pend ? '' : 'tabindex="-1" disabled'}>Done</button></div></div>`;
   }
 }
 
@@ -273,7 +279,11 @@ function done() {
   if (navigator.vibrate) navigator.vibrate(choice === 'y' ? 30 : [20, 40, 20]);
   location.hash = '#/';
 }
-function release() { paintDecision(); } // NOW stays where you leave it; nothing is logged until Done
+function release() { // NOW stays where you leave it; nothing is logged until Done
+  paintDecision();
+  const card = document.querySelector('#result .result:not(.placeholder)');
+  if (card) card.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+}
 
 const yOf = (ev, el) => { const r = el.getBoundingClientRect(); return 15 + (ev.clientY - r.top) / r.height * 270; };
 app.addEventListener('pointerdown', (ev) => {
