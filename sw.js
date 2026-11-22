@@ -1,6 +1,6 @@
 /* Service worker: network-first with an offline cache of the app shell.
    Bump VERSION when the SHELL list changes. */
-const VERSION = 'mic-v2';
+const VERSION = 'mic-v3';
 const SHELL = [
   './', './index.html', './styles.css', './manifest.webmanifest',
   './js/app.js', './js/model.js', './js/storage.js', './js/version.js',
@@ -9,7 +9,8 @@ const SHELL = [
 const FONTS = 'mic-fonts';
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' bypasses the browser's HTTP cache so a new worker never installs stale files.
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -36,9 +37,11 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return;
 
   // App files: network first (so updates land immediately), cache when offline.
+  // cache: 'no-cache' revalidates with the server every time; GitHub Pages otherwise lets the
+  // browser reuse files for up to 10 minutes without asking.
   // Navigations fall back to the shell: the app is a single page.
   e.respondWith(
-    fetch(req).then(res => {
+    fetch(req, { cache: 'no-cache' }).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req.mode === 'navigate' ? './index.html' : req, copy)); }
       return res;
     }).catch(() => caches.match(req.mode === 'navigate' ? './index.html' : req, { ignoreSearch: true }))
