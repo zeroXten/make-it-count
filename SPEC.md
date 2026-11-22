@@ -163,6 +163,8 @@ The numbers exist only to choose a comparison. They are never shown.
 ```
 make-it-count/
 ├── SPEC.md                  ← this file
+├── index.html, styles.css, js/, sw.js, manifest.webmanifest, icons/
+│                            ← the web app (PWA), served from the repo root — see README.md
 ├── prototype/index.html     ← interactive phone prototype (?screen=home|snack|holds|add, &mood=slipping)
 ├── previews/                ← PNG renders of each screen/state
 └── design-canvas/           ← Claude Design artboard sources (.dc.html) + canvas.json

@@ -1,11 +1,11 @@
-# Make It Count — web app
+# Make It Count
 
-A plain HTML/CSS/JS installable PWA built from [`../SPEC.md`](../SPEC.md). There's no build step and no dependencies.
+A plain HTML/CSS/JS installable PWA built from [`SPEC.md`](SPEC.md). There's no build step and no dependencies.
 
 ## Run locally
 
 ```bash
-python3 -m http.server 8123 --directory app
+python3 -m http.server 8123
 ```
 
 Then open http://localhost:8123. Service workers only run over `https` or on `localhost`, so opening `index.html` as a file won't make it installable.
@@ -15,7 +15,7 @@ Then open http://localhost:8123. Service workers only run over `https` or on `lo
 - **Chrome / Edge (desktop or Android):** use the "Install app" link on the home screen, or the install icon in the address bar.
 - **iOS Safari:** Share → Add to Home Screen.
 
-To install it on a phone, host the `app/` folder on any static HTTPS host (GitHub Pages, Netlify, Cloudflare Pages). All paths are relative, so a subfolder works.
+The app is served from the repo root, so GitHub Pages (deploying from the root of the branch) serves it as-is. `.nojekyll` tells Pages to skip Jekyll processing. All paths are relative, so it also works under a project path like `/make-it-count/`.
 
 ## Structure
 
@@ -28,6 +28,7 @@ To install it on a phone, host the `app/` folder on any static HTTPS host (GitHu
 | `js/storage.js` | `localStorage` persistence (key `make-it-count:v1`) |
 | `sw.js` | Network-first, with an offline cache of the app shell and Google Fonts |
 | `manifest.webmanifest`, `icons/` | PWA metadata and icons |
+| `SPEC.md`, `prototype/`, `previews/`, `design-canvas/` | Design spec and source material (not part of the app) |
 
 ## Data
 
