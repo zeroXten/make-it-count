@@ -180,7 +180,9 @@ function home() {
 }
 
 /* ================= Decision ================= */
-let dec = null; // { id, v, drag, choice, eventId }
+let dec = null; // { id, v, drag }
+// The choice is wherever NOW is left: past ±60% it's a pending skip/have, logged only when Done is pressed.
+const pending = () => !dec ? null : dec.v > 0.6 ? 'y' : dec.v < -0.6 ? 'n' : null;
 
 function decisionShell(lever) {
   const c = copyFor(lever);
@@ -190,7 +192,7 @@ function decisionShell(lever) {
     <p class="muted dec-instr">Grab NOW and move it. Watch summer-you move with it.</p>
     <div class="card chart-card">
       <svg class="drag" id="drag" viewBox="0 15 350 270" tabindex="0" role="slider" aria-orientation="vertical"
-        aria-label="${esc(c.q)} Move NOW up to ${esc(c.up.slice(2))}, down to ${esc(c.down.slice(2))}. Press Enter to commit."
+        aria-label="${esc(c.q)} Move NOW up to ${esc(c.up.slice(2))}, down to ${esc(c.down.slice(2))}. Press Enter for Done."
         aria-valuemin="-100" aria-valuemax="100"></svg>
       <div class="timeline"><b>now</b>${H.ticks.map(t => `<span>${t}</span>`).join('')}<b>summer</b></div>
     </div>
@@ -202,7 +204,7 @@ function decisionShell(lever) {
 
 function decisionModel(lever) {
   const c = copyFor(lever), B = leverBase(lever, data.events);
-  const v = dec.v, ch = dec.choice, idle = Math.abs(v) < 0.05 && !ch;
+  const v = dec.v, ch = pending(), idle = Math.abs(v) < 0.05;
   const e = v >= 0 ? B + v * (1 - B) : B + v * (1 + B); // effective summer position
   const mag = Math.abs(e), good = e > 0, flat = mag < 0.08;
   const ny = Math.round(150 - v * 50), ey = Math.round(150 - e * 118), eyb = Math.round(150 - B * 118);
@@ -224,7 +226,6 @@ function paintDecision() {
   const svg = document.getElementById('drag');
   svg.setAttribute('aria-valuenow', Math.round(m.v * 100));
   svg.setAttribute('aria-valuetext', m.p.text);
-  svg.classList.toggle('locked', !!dec.choice);
   const showBase = !m.idle && Math.abs(m.B) > 0.02;
   svg.innerHTML = `
     <rect x="0" y="0" width="350" height="150" fill="${C.good}" opacity="0.05"/>
@@ -250,44 +251,34 @@ function paintDecision() {
   proj.className = 'proj ' + (m.flat ? '' : m.good ? 'good' : 'bad');
   proj.innerHTML = `<div class="proj-label">${m.projLabel}</div><div class="proj-text">${esc(m.p.text)}</div>${m.p.sub ? `<div class="proj-sub">${esc(m.p.sub)}</div>` : ''}`;
 
-  const res = document.getElementById('result');
-  if (dec.choice && !res.dataset.shown) {
-    const y = dec.choice === 'y';
-    res.dataset.shown = '1';
-    res.innerHTML = `<div class="result ${y ? 'good' : 'bad'}">
-      <div>${esc(y ? c.yesText(lever.vals) : c.noText(lever.vals))}</div>
-      <div class="row-start"><button class="btn-ghost" id="undo">Undo</button><a class="btn-ghost" href="#/">Done</a></div></div>`;
-    res.firstElementChild.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
-  } else if (!dec.choice && res.dataset.shown) {
-    delete res.dataset.shown; res.innerHTML = '';
+  const res = document.getElementById('result'), pend = pending(), state = pend || '';
+  if (res.dataset.state !== state) {
+    const first = !res.dataset.state;
+    res.dataset.state = state;
+    if (!pend) { res.innerHTML = ''; }
+    else {
+      const y = pend === 'y';
+      res.innerHTML = `<div class="result ${y ? 'good' : 'bad'}">
+        <div>${esc(y ? c.yesText(lever.vals) : c.noText(lever.vals))}</div>
+        <div class="row-start"><button class="btn-ghost" id="done">Done</button></div></div>`;
+      if (first) res.firstElementChild.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+    }
   }
 }
 
-function commit(choice) {
-  dec.v = choice === 'y' ? 1 : -1;
-  dec.choice = choice;
-  const ev = { id: uid(), leverId: dec.id, t: Date.now(), c: choice };
-  dec.eventId = ev.id;
-  data.events.push(ev); persist();
+function done() {
+  const choice = pending();
+  if (!choice) return;
+  data.events.push({ id: uid(), leverId: dec.id, t: Date.now(), c: choice }); persist();
   if (navigator.vibrate) navigator.vibrate(choice === 'y' ? 30 : [20, 40, 20]);
-  paintDecision();
+  location.hash = '#/';
 }
-function undo() {
-  data.events = data.events.filter(e => e.id !== dec.eventId); persist();
-  dec.choice = null; dec.eventId = null; dec.v = 0;
-  paintDecision();
-  document.getElementById('drag').focus();
-}
-function release() {
-  if (dec.v > 0.6) commit('y');
-  else if (dec.v < -0.6) commit('n');
-  else { dec.v = 0; paintDecision(); }
-}
+function release() { paintDecision(); } // NOW stays where you leave it; nothing is logged until Done
 
 const yOf = (ev, el) => { const r = el.getBoundingClientRect(); return 15 + (ev.clientY - r.top) / r.height * 270; };
 app.addEventListener('pointerdown', (ev) => {
   const svg = ev.target.closest('#drag');
-  if (!svg || !dec || dec.choice) return;
+  if (!svg || !dec) return;
   ev.preventDefault();
   svg.setPointerCapture(ev.pointerId);
   dec.drag = true;
@@ -305,11 +296,11 @@ app.addEventListener('pointerup', endDrag);
 app.addEventListener('pointercancel', endDrag);
 
 app.addEventListener('keydown', (ev) => {
-  if (ev.target.id !== 'drag' || !dec || dec.choice) return;
+  if (ev.target.id !== 'drag' || !dec) return;
   const k = ev.key;
   if (k === 'ArrowUp' || k === 'ArrowRight') dec.v = clamp(dec.v + 0.2);
   else if (k === 'ArrowDown' || k === 'ArrowLeft') dec.v = clamp(dec.v - 0.2);
-  else if (k === 'Enter' || k === ' ') { release(); ev.preventDefault(); return; }
+  else if (k === 'Enter' || k === ' ') { done(); ev.preventDefault(); return; }
   else if (k === 'Escape') dec.v = 0;
   else return;
   ev.preventDefault();
@@ -391,7 +382,7 @@ function updateInstallButton() { const b = document.getElementById('install'); i
 /* ================= Events & render ================= */
 app.addEventListener('click', async (e) => {
   const id = e.target.closest('button')?.id;
-  if (id === 'undo') return undo();
+  if (id === 'done') return done();
   if (id === 'save') return saveForm();
   if (id === 'delete') return deleteLever();
   if (id === 'export') return exportData();
@@ -418,7 +409,7 @@ app.addEventListener('submit', (e) => e.preventDefault());
 function render() {
   const r = route();
   dec = null; form = null;
-  if (r.name === 'decision') { dec = { id: r.id, v: 0, drag: false, choice: null }; decisionShell(data.levers.find(l => l.id === r.id)); }
+  if (r.name === 'decision') { dec = { id: r.id, v: 0, drag: false }; decisionShell(data.levers.find(l => l.id === r.id)); }
   else if (r.name === 'form') {
     const l = r.id && data.levers.find(x => x.id === r.id);
     form = l ? { id: l.id, type: l.type, name: l.name, vals: { ...defaults(l.type), ...l.vals } } : { type: 'snack', name: TYPES.snack.name, vals: defaults('snack') };

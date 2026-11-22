@@ -38,4 +38,4 @@ Model: `levers[]` holds `{ id, type, name, vals, created }`. `events[]` holds `{
 
 ## Accessibility
 
-The decision chart is a focusable `role="slider"`. Use ↑/↓ to move NOW, Enter to commit (once past 60%), and Esc to reset. The screen reader reads out the projection text as the value.
+The decision chart is a focusable `role="slider"`. Use ↑/↓ to move NOW, Enter for Done (once past 60%), and Esc to reset. The screen reader reads out the projection text as the value.

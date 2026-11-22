@@ -75,7 +75,7 @@ The core interaction. One per lever (snack and stance holds shown).
    - At rest: "On your current pace, by summer: **You, nearly a bag of sugar lighter.**"
    - While dragging: "If this becomes your habit, by summer: **You, a bag of sugar heavier.** Tighter jeans. Less energy. Same summer as last year, only heavier."
    - Panel fills green/red to match.
-6. **Result card** after commit, with Undo.
+6. **Result card + Done** whenever NOW is left past ±60%. No Undo: nothing is logged until Done.
 
 #### 5.2.1 Gesture
 
@@ -83,7 +83,9 @@ The core interaction. One per lever (snack and stance holds shown).
 - Effective future position `e`:
   - `e = base + v·(1 − base)` when dragging up, `e = base + v·(1 + base)` when dragging down, where `v ∈ [−1, 1]` is handle position and `base` is the current-path position (0.5 in mocks).
   - So: at rest the line shows the current path; full drag down drives past old-you into the red.
-- **Release past ±60%** commits (snap to end, haptic: short buzz for good, double-buzz for bad). Release short of it springs back to rest.
+- **NOW stays where you leave it.** Releasing never commits and never springs back, so you can keep adjusting: drag up, back to the middle, down, as often as you like.
+- Past ±60% the choice is **pending**: headline flips to the result ("Lighter by summer." / "Heavier by summer.") and a result card with a **Done** button appears. Back in the middle, the card disappears.
+- **Done** logs the choice (haptic: short buzz for good, double-buzz for bad) and returns home. Leaving the screen without Done logs nothing.
 - No tap alternative for the decision.
 
 #### 5.2.2 Copy
@@ -93,8 +95,8 @@ The core interaction. One per lever (snack and stance holds shown).
 | Rest headline | Snack? | Holds now? |
 | Dragging up | You just changed summer. | You just changed summer. |
 | Dragging down | You just changed summer. For the worse. | same |
-| Committed good | Lighter by summer. | Stronger by summer. |
-| Committed bad | Heavier by summer. | Weaker by summer. |
+| Pending good (past 60%) | Lighter by summer. | Stronger by summer. |
+| Pending bad (past 60%) | Heavier by summer. | Weaker by summer. |
 | Good result | Skipped. Clothes that fit better, more energy, less puffed on the stairs. That's what you just chose. | Timer's on. Stronger legs, better balance, hard holds getting easy. Ten minutes. |
 | Bad result | Had it. You just pulled summer-you down. Make the next one count. | Skipped. That's a day summer-you doesn't get back. I'll ask again at half one. |
 
