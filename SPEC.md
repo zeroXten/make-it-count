@@ -136,11 +136,12 @@ Ranges allow heavy-but-real use (several times a day for frequent habits). Types
 
 ### Direction: cutting back vs building up
 
-Green/red always mean **good/bad for you**, never "more/less". Direction is shown separately, in neutral ink:
+Shown with colour only, no icons or headings:
 
-- **Cutting back** (snacks, alcohol, scrolling…): outlined circle with a minus **−**. Streak unit: *days clear*, status *clear today ✓*.
-- **Building up** (exercise, sleep, fruit & veg…): solid circle with a plus **+**. Streak unit: *days done*, status *done today ✓*.
-- Home groups the habit tiles under *Cutting back* and *Building up* headings, each tile with its marker; the streaks card groups its rows the same way; the decision screen shows a *− Cutting back* / *+ Building up* pill above the chart.
+- **Building up** (exercise, sleep, fruit & veg…): **green** (`#1B6B4F`, on dark `#7FD1AE`). Streak unit *days done*, status *done today ✓*.
+- **Cutting back** (snacks, alcohol, scrolling…): **blue** (`#2560C8`, on dark `#8DBBF5`). Streak unit *days clear*, status *clear today ✓*.
+- **Red** always means a slip, for either direction.
+- Applies to home tile sparklines and the streaks card (day squares, count, status). The decision chart keeps green = good outcome, red = bad outcome.
 
 ## 6. Projection model (deliberately loose)
 

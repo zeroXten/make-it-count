@@ -146,24 +146,9 @@ input[type=range] { width: 100%; height: 32px; margin: 0; accent-color: var(--go
 .result.placeholder { visibility: hidden; animation: none; }
 .version { margin-top: auto; padding-top: 8px; text-align: center; font-size: 11px; color: #8A8F96; letter-spacing: 0.3px; }
 
-/* Direction markers: cut back (outlined −) vs build up (solid +). Neutral colour: green/red stay for good/bad. */
-.dir { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font: 700 14px/1 var(--body); box-sizing: border-box; }
-.dir-less { border: 1.75px solid currentColor; }
-.dir-more { background: var(--ink); color: #fff; }
-.hero .dir-more { background: #F5F3EE; color: var(--dark); }
-.hero .dir-less { color: #F5F3EE; }
-.tile-title { display: inline-flex; align-items: flex-start; gap: 7px; min-width: 0; }
-.tile-title .dir { margin-top: 2px; }
-.dir-label { display: flex; align-items: center; gap: 8px; }
-.dir-label .dir { color: var(--muted); }
-.dir-label .dir-more { background: var(--muted); color: #fff; }
-.dir-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px 3px 4px; margin-right: 4px; vertical-align: 1px; }
-.dir-pill .dir { width: 16px; height: 16px; font-size: 12px; }
-.ls-group { display: flex; flex-direction: column; gap: 0; }
-.ls-group-label { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: #8A8F96; padding-top: 4px; }
-.ls-group-label .dir { width: 14px; height: 14px; font-size: 11px; }
-.hero .ls-group-label .dir-less { color: #8A8F96; }
-.hero .ls-group-label .dir-more { background: #8A8F96; color: var(--dark); }
-.ls-name b { display: flex; align-items: center; gap: 7px; }
-.ls-name b > span { overflow: hidden; text-overflow: ellipsis; }
+/* Direction colour on the streaks card: cutting back = blue, building up = green. */
+.ls-row.less .sd.good { background: #8DBBF5; }
+.ls-row.less .ls-num { color: #8DBBF5; }
+.ls-row.less .ls-status.done { color: #8DBBF5; }
+.ls-num.zero { color: #5B6068 !important; }
 .ls-num small { white-space: nowrap; }
