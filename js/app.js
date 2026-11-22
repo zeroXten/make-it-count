@@ -201,7 +201,8 @@ const hyst = (cur, x, enter, exit) => cur === 'up' ? (x < -enter ? 'down' : x < 
   : (x > enter ? 'up' : x < -enter ? 'down' : 'rest');
 function settle(e, B) {
   dec.zone = hyst(dec.zone || 'rest', dec.v, 0.18, 0.05);   // headline: rest / changed / for the worse
-  dec.tone = hyst(dec.tone || 'rest', e, 0.16, 0.02);        // colour: flat / green / red
+  // colour: flat / green / red. In the centre dead zone it reflects your current pace (B), like the panel.
+  dec.tone = hyst(dec.tone || 'rest', dec.zone === 'rest' ? B : e, 0.16, 0.02);
   const p = hyst(dec.pend === 'y' ? 'up' : dec.pend === 'n' ? 'down' : 'rest', dec.v, 0.6, 0.47);
   dec.pend = p === 'up' ? 'y' : p === 'down' ? 'n' : null;  // Done card
   // Projection wording: at rest it's exactly your current pace; otherwise it only updates after a clear move.
@@ -237,9 +238,16 @@ function decisionModel(lever) {
   const mag = Math.abs(e), good = dec.tone === 'up', flat = dec.tone === 'rest';
   const ny = Math.round(150 - v * 50), ey = Math.round(150 - e * 118), eyb = Math.round(150 - B * 118);
   const col = flat ? C.muted : (good ? C.good : C.bad);
-  const head = ch === 'y' ? c.yesHead : ch === 'n' ? c.noHead : idle ? c.q : (dec.zone === 'up' ? 'You just changed summer.' : 'You just changed summer. For the worse.');
+  // Headline follows the drag direction; when the outcome is still on the other side of old-you it says so,
+  // so it never contradicts the projection panel ("gave some back" while still lighter, etc).
+  const head = ch === 'y' ? c.yesHead : ch === 'n' ? c.noHead : idle ? c.q
+    : dec.zone === 'up' ? (dec.tone === 'down' ? 'You just clawed some of summer back.' : dec.tone === 'rest' ? 'You just clawed summer back.' : 'You just changed summer.')
+    : (dec.tone === 'up' ? 'You just gave some of summer back.' : dec.tone === 'rest' ? 'You just threw summer away.' : 'You just changed summer. For the worse.');
   const headCol = (ch === 'n' || (!ch && dec.zone === 'down')) ? C.bad : (ch === 'y' || (!ch && dec.zone === 'up')) ? C.good : C.ink;
-  const p = projection(lever, dec.pe, H.weeks);
+  // Projection always agrees with the colour state (tone), so headline, chart and panel never contradict.
+  const p = flat
+    ? (idle ? projection(lever, 0, H.weeks) : { text: 'You, back where you started.', sub: '' })
+    : projection(lever, (good ? 1 : -1) * Math.max(Math.abs(dec.pe), 0.1), H.weeks);
   return { c, B, v, idle, e, mag, good, flat, ny, ey, eyb, col, head, headCol, p,
     line: `M40 ${ny} C 120 ${ny}, 210 ${Math.round((ny + ey) / 2)}, 300 ${ey}`,
     base: `M40 150 C 120 150, 210 ${Math.round((150 + eyb) / 2)}, 300 ${eyb}`,
@@ -302,6 +310,8 @@ function done() {
   location.hash = '#/';
 }
 function release() { // NOW stays where you leave it; nothing is logged until Done
+  // Let go near the centre and it settles exactly at the centre: back to "on your current pace".
+  if (Math.abs(dec.v) < 0.18) { dec.v = 0; dec.zone = 'rest'; dec.tone = undefined; dec.pend = null; }
   paintDecision();
   const card = document.querySelector('#result .result:not(.placeholder)');
   if (card) card.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
