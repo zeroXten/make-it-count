@@ -190,7 +190,22 @@ function home() {
 /* ================= Decision ================= */
 let dec = null; // { id, v, drag }
 // The choice is wherever NOW is left: past ±60% it's a pending skip/have, logged only when Done is pressed.
-const pending = () => !dec ? null : dec.v > 0.6 ? 'y' : dec.v < -0.6 ? 'n' : null;
+const pending = () => (dec && dec.pend) || null;
+
+/* Hysteresis: every on-screen state flips at one threshold and only flips back at a lower one,
+   so a finger resting near a boundary can't make the screen flicker between states. */
+const hyst = (cur, x, enter, exit) => cur === 'up' ? (x < -enter ? 'down' : x < exit ? 'rest' : 'up')
+  : cur === 'down' ? (x > enter ? 'up' : x > -exit ? 'rest' : 'down')
+  : (x > enter ? 'up' : x < -enter ? 'down' : 'rest');
+function settle(e, B) {
+  dec.zone = hyst(dec.zone || 'rest', dec.v, 0.18, 0.05);   // headline: rest / changed / for the worse
+  dec.tone = hyst(dec.tone || 'rest', e, 0.16, 0.02);        // colour: flat / green / red
+  const p = hyst(dec.pend === 'y' ? 'up' : dec.pend === 'n' ? 'down' : 'rest', dec.v, 0.6, 0.47);
+  dec.pend = p === 'up' ? 'y' : p === 'down' ? 'n' : null;  // Done card
+  // Projection wording: at rest it's exactly your current pace; otherwise it only updates after a clear move.
+  if (dec.zone === 'rest') dec.pe = B;
+  else if (dec.pe === undefined || Math.abs(e - dec.pe) > 0.12 || Math.abs(e) > 0.97) dec.pe = e;
+}
 
 function decisionShell(lever) {
   const c = copyFor(lever);
@@ -213,14 +228,16 @@ function decisionShell(lever) {
 
 function decisionModel(lever) {
   const c = copyFor(lever), B = leverBase(lever, data.events);
-  const v = dec.v, ch = pending(), idle = Math.abs(v) < 0.05;
-  const e = v >= 0 ? B + v * (1 - B) : B + v * (1 + B); // effective summer position
-  const mag = Math.abs(e), good = e > 0, flat = mag < 0.08;
+  const v = dec.v;
+  const e = v >= 0 ? B + v * (1 - B) : B + v * (1 + B); // effective summer position (drives the geometry, smoothly)
+  settle(e, B);
+  const ch = pending(), idle = dec.zone === 'rest';
+  const mag = Math.abs(e), good = dec.tone === 'up', flat = dec.tone === 'rest';
   const ny = Math.round(150 - v * 50), ey = Math.round(150 - e * 118), eyb = Math.round(150 - B * 118);
   const col = flat ? C.muted : (good ? C.good : C.bad);
-  const head = ch === 'y' ? c.yesHead : ch === 'n' ? c.noHead : idle ? c.q : (v > 0 ? 'You just changed summer.' : 'You just changed summer. For the worse.');
-  const headCol = (ch === 'n' || (!ch && !idle && v < 0)) ? C.bad : (ch === 'y' || (!ch && !idle && v > 0)) ? C.good : C.ink;
-  const p = projection(lever, e, H.weeks);
+  const head = ch === 'y' ? c.yesHead : ch === 'n' ? c.noHead : idle ? c.q : (dec.zone === 'up' ? 'You just changed summer.' : 'You just changed summer. For the worse.');
+  const headCol = (ch === 'n' || (!ch && dec.zone === 'down')) ? C.bad : (ch === 'y' || (!ch && dec.zone === 'up')) ? C.good : C.ink;
+  const p = projection(lever, dec.pe, H.weeks);
   return { c, B, v, idle, e, mag, good, flat, ny, ey, eyb, col, head, headCol, p,
     line: `M40 ${ny} C 120 ${ny}, 210 ${Math.round((ny + ey) / 2)}, 300 ${ey}`,
     base: `M40 150 C 120 150, 210 ${Math.round((150 + eyb) / 2)}, 300 ${eyb}`,
