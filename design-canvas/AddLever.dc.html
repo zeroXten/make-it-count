@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add a lever</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#16181B}a:hover{color:#1B6B4F}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 20px; background: #F5F3EE; font-family: Inter, sans-serif; color: #16181B; display: flex; flex-direction: column; gap: 10px">
+  <div style="display: flex; justify-content: space-between; align-items: center">
+    <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700">New lever</h1>
+    <a href="Main.dc.html" style="font-size: 14px; text-decoration: none; padding: 10px 0">Cancel</a>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 8px">
+    <sc-for list="{{types}}" as="t" hint-placeholder-count="7">
+      <sc-if value="{{t.on}}" hint-placeholder-val="{{false}}">
+        <button type="button" onClick="{{t.pick}}" style="font: inherit; font-size: 14px; font-weight: 600; color: #FFFFFF; background: #16181B; border: 1px solid #16181B; border-radius: 999px; padding: 8px 13px; min-height: 36px; cursor: pointer">{{t.label}}</button>
+      </sc-if>
+      <sc-if value="{{t.off}}" hint-placeholder-val="{{true}}">
+        <button type="button" onClick="{{t.pick}}" style="font: inherit; font-size: 14px; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 999px; padding: 8px 13px; min-height: 36px; cursor: pointer">{{t.label}}</button>
+      </sc-if>
+    </sc-for>
+  </div>
+  <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #5B6068">Name
+    <input type="text" value="{{name}}" onChange="{{setName}}" style="font: inherit; font-size: 16px; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 12px; padding: 11px 12px">
+  </label>
+  <div style="background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+    <sc-for list="{{fields}}" as="f" hint-placeholder-count="3">
+      <label style="display: flex; flex-direction: column; gap: 4px">
+        <span style="display: flex; justify-content: space-between; font-size: 14px"><span>{{f.label}}</span><span style="font-weight: 600">{{f.shown}}</span></span>
+        <input type="range" min="{{f.min}}" max="{{f.max}}" step="{{f.step}}" value="{{f.value}}" onChange="{{f.set}}" style="width: 100%; height: 28px; margin: 0; accent-color: #1B6B4F">
+      </label>
+    </sc-for>
+    <div style="font-size: 12px; color: #5B6068">Typical values to start. Close enough is fine.</div>
+  </div>
+  <div style="background: #16181B; color: #F5F3EE; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px">
+    <div style="font-size: 14px; color: #B9BDC4">{{head}}</div>
+    <sc-for list="{{lines}}" as="l" hint-placeholder-count="2">
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600; line-height: 1.25">{{l.text}}</div>
+    </sc-for>
+  </div>
+  <a href="Main.dc.html" style="text-decoration: none; text-align: center; font-weight: 600; font-size: 16px; color: #FFFFFF; background: #1B6B4F; border-radius: 14px; padding: 14px; min-height: 44px; box-sizing: border-box">Add lever</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+const T = {
+  snack: { name: 'Evening snack', mode: 'avoid', f: [['kcal','Calories each',0,600,10,100,'kcal'],['cost','Cost each',0,5,0.1,0.5,'gbp'],['usual','Usually, per week',0,21,1,7,'wk']] },
+  dessert: { name: 'Dessert', mode: 'avoid', f: [['kcal','Calories each',0,800,10,250,'kcal'],['cost','Cost each',0,8,0.1,0,'gbp'],['usual','Usually, per week',0,14,1,5,'wk']] },
+  drink: { name: 'Drink', mode: 'avoid', f: [['kcal','Calories each',0,400,10,100,'kcal'],['cost','Cost each',0,12,0.1,4.3,'gbp'],['usual','Usually, per week',0,28,1,6,'wk']] },
+  exercise: { name: 'Workout', mode: 'exercise', f: [['min','Minutes each',5,120,5,30,'min'],['kcal','Calories burned',0,800,10,250,'kcal'],['usual','Usually, per week',0,14,1,2,'wk']] },
+  practice: { name: 'Stance holds', mode: 'practice', f: [['min','Minutes each',1,60,1,10,'min'],['usual','Usually, per week',0,14,1,3,'wk']] },
+  fruit: { name: 'Fruit & veg', mode: 'fruit', f: [['usual','Portions a week now',0,35,1,7,'n']] },
+  bed: { name: 'Bed on time', mode: 'bed', f: [['time','In bed by',0,180,15,120,'time'],['gain','Extra sleep per early night',15,120,5,45,'min'],['usual','Early nights now, per week',0,7,1,1,'wk']] }
+};
+const ORDER = [['snack','Snack'],['dessert','Dessert'],['drink','Drink'],['exercise','Exercise'],['practice','Practice'],['fruit','Fruit & veg'],['bed','Bedtime']];
+function defaults(t) { const v = {}; T[t].f.forEach((x) => { v[x[0]] = x[5]; }); return v; }
+const WEEKS = 30;
+function fmt(u, v) {
+  if (u === 'kcal') return v + ' kcal';
+  if (u === 'gbp') return '£' + Number(v).toFixed(2);
+  if (u === 'wk') return v + ' a week';
+  if (u === 'min') return v + ' min';
+  if (u === 'time') { const m = 21 * 60 + Number(v); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+  return String(v);
+}
+function kgThing(kcalWeek) {
+  const kg = kcalWeek * WEEKS / 7700 * 0.8;
+  if (kg < 0.15) return 'barely a dent — but it adds up';
+  if (kg < 0.4) return 'a block of butter lighter';
+  if (kg < 1.5) return 'a bag of sugar lighter';
+  if (kg < 3.5) return 'a bag of potatoes lighter';
+  if (kg < 7) return 'a bowling ball lighter';
+  return 'a full suitcase lighter';
+}
+function moneyThing(gbp) {
+  if (gbp < 15) return null;
+  if (gbp < 40) return 'a takeaway richer';
+  if (gbp < 120) return 'a nice meal out richer';
+  if (gbp < 350) return 'a weekend away richer';
+  if (gbp < 900) return 'a long weekend in Europe richer';
+  return 'a proper holiday richer';
+}
+function hoursThing(h) {
+  if (h < 6) return 'a few evenings of practice in the bank';
+  if (h < 16) return 'a couple of full days of practice in the bank';
+  if (h < 45) return 'a working week of practice in the bank';
+  return 'two working weeks of practice in the bank';
+}
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { type: 'snack', vals: defaults('snack'), name: T.snack.name }; }
+  renderVals() {
+    const s = this.state, t = T[s.type], v = s.vals;
+    const types = ORDER.map(([k, l]) => ({ label: l, on: k === s.type, off: k !== s.type, pick: () => this.setState({ type: k, vals: defaults(k), name: T[k].name }) }));
+    const fields = t.f.map(([k, l, mn, mx, st, d, u]) => ({ label: l, min: mn, max: mx, step: st, value: v[k], shown: fmt(u, v[k]),
+      set: (e) => { const n = Number(e.target.value); this.setState((p) => ({ vals: { ...p.vals, [k]: n } })); } }));
+    let head = '', lines = [];
+    if (t.mode === 'avoid') {
+      const h = v.usual / 2;
+      head = 'Skip half of them, and summer-you is…';
+      lines = [kgThing(h * v.kcal)];
+      const m = moneyThing(h * v.cost * WEEKS); if (m) lines.push(m);
+    } else if (t.mode === 'exercise') {
+      head = 'One more a week, and summer-you is…';
+      lines = [kgThing(v.kcal * 0.6), 'fitter, and sleeping better'];
+    } else if (t.mode === 'practice') {
+      head = 'One more a week, and summer-you has…';
+      lines = [hoursThing(v.min * WEEKS / 60)];
+    } else if (t.mode === 'fruit') {
+      head = 'One more a day, and by summer that’s…';
+      lines = ['a couple of hundred more portions', 'more energy in the afternoons'];
+    } else {
+      const n = Math.max(0, Math.min(2, 7 - v.usual)), hrs = n * v.gain * WEEKS / 60;
+      head = n > 0 ? 'Two more early nights a week, and by summer…' : 'Already every night. Nice.';
+      lines = [hrs < 30 ? 'a few extra nights of sleep banked' : hrs < 80 ? 'an extra week of sleep banked' : 'a couple of extra weeks of sleep banked', 'fewer foggy mornings'];
+    }
+    return { types, fields, head, lines: lines.map((x) => ({ text: x })), name: s.name, setName: (e) => this.setState({ name: e.target.value }) };
+  }
+}
+</script>
+</body>
+</html>

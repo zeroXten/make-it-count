@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make It Count — prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ground: #F5F3EE; --card: #FFFFFF; --ink: #16181B; --muted: #5B6068; --line: #E4E0D8;
+    --good: #1B6B4F; --good-soft: #E7F1EC; --bad: #C0362C; --ghost: #9A9EA5;
+    --dark: #16181B; --dark-muted: #B9BDC4; --good-on-dark: #7FD1AE; --bad-on-dark: #FF8A7A;
+    --display: 'Space Grotesk', system-ui, sans-serif; --body: Inter, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #DDD9D0; font-family: var(--body); color: var(--ink); }
+  .phone { width: 390px; min-height: 844px; margin: 0 auto; background: var(--ground); padding: 24px 20px; display: flex; flex-direction: column; gap: 14px; }
+  h1 { margin: 0; font-family: var(--display); font-weight: 700; }
+  a { color: var(--ink); }
+  .back { font-size: 14px; font-weight: 500; text-decoration: none; padding: 10px 0; align-self: flex-start; }
+  .muted { color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .tile { font: inherit; text-align: left; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; text-decoration: none; cursor: pointer; }
+  .tile-name { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 16px; }
+  .chip { font-size: 12px; font-weight: 600; border: 1px solid currentColor; border-radius: 999px; padding: 5px 8px; }
+  .pill { font: inherit; font-size: 14px; border-radius: 999px; padding: 8px 13px; min-height: 36px; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .pill.on { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 600; }
+  .btn-primary { display: block; text-align: center; text-decoration: none; font-weight: 600; font-size: 16px; color: #fff; background: var(--good); border-radius: 14px; padding: 14px; }
+  input[type=range] { width: 100%; height: 28px; margin: 0; accent-color: var(--good); }
+  svg.drag { display: block; touch-action: none; cursor: grab; }
+  svg.drag:active { cursor: grabbing; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- Content ---------- */
+const LEVERS = {
+  snack: {
+    q: 'Snack?', top: 'lighter', bot: 'heavier', upHint: '↑ skip it', downHint: '↓ have it',
+    goodHead: 'You just changed summer.', badHead: 'You just changed summer. For the worse.',
+    yesHead: 'Lighter by summer.', noHead: 'Heavier by summer.',
+    good: [[0.45, 'a block of butter lighter'], [0.8, 'nearly a bag of sugar lighter'], [2, 'a bag of sugar lighter']],
+    bad: [[0.45, 'a block of butter heavier'], [0.8, 'nearly a bag of sugar heavier'], [2, 'a bag of sugar heavier']],
+    goodSub: 'Clothes fit better. More energy. Less puffed on the stairs.',
+    badSub: 'Tighter jeans. Less energy. Same summer as last year, only heavier.',
+    yesText: 'Skipped. Clothes that fit better, more energy, less puffed on the stairs. That’s what you just chose.',
+    noText: 'Had it. You just pulled summer-you down. Make the next one count.',
+    base: 0.5
+  },
+  holds: {
+    q: 'Holds now?', top: 'stronger', bot: 'weaker', upHint: '↑ do it now', downHint: '↓ skip it',
+    goodHead: 'You just changed summer.', badHead: 'You just changed summer. For the worse.',
+    yesHead: 'Stronger by summer.', noHead: 'Weaker by summer.',
+    good: [[0.45, 'a bit stronger'], [0.8, 'noticeably stronger'], [2, 'properly strong']],
+    bad: [[0.45, 'a bit weaker'], [0.8, 'noticeably weaker'], [2, 'back to where you started']],
+    goodSub: 'Stronger legs. Better balance. Holds that were hard feel easy.',
+    badSub: 'The strength you built fades. Holds feel hard again.',
+    yesText: 'Timer’s on. Stronger legs, better balance, hard holds getting easy. Ten minutes.',
+    noText: 'Skipped. That’s a day summer-you doesn’t get back. I’ll ask again at half one.',
+    base: 0.5
+  }
+};
+
+const HOME_TILES = [
+  ['Snack', '9 skipped this month', 'up', 'snack'],
+  ['Dessert', 'No change yet', 'flat'],
+  ['Drink', '6 nights off this month', 'up'],
+  ['Exercise', '11 workouts this month', 'up'],
+  ['Stance holds', '16 sessions this month', 'up', 'holds'],
+  ['Fruit & veg', 'Less than last month', 'down'],
+  ['Bed by 11', '14 early nights this month', 'up']
+];
+
+/* Lever templates: [key, label, min, max, step, default, unit] */
+const TYPES = {
+  snack: { name: 'Evening snack', mode: 'avoid', f: [['kcal','Calories each',0,600,10,100,'kcal'],['cost','Cost each',0,5,0.1,0.5,'gbp'],['usual','Usually, per week',0,21,1,7,'wk']] },
+  dessert: { name: 'Dessert', mode: 'avoid', f: [['kcal','Calories each',0,800,10,250,'kcal'],['cost','Cost each',0,8,0.1,0,'gbp'],['usual','Usually, per week',0,14,1,5,'wk']] },
+  drink: { name: 'Drink', mode: 'avoid', f: [['kcal','Calories each',0,400,10,100,'kcal'],['cost','Cost each',0,12,0.1,4.3,'gbp'],['usual','Usually, per week',0,28,1,6,'wk']] },
+  exercise: { name: 'Workout', mode: 'exercise', f: [['min','Minutes each',5,120,5,30,'min'],['kcal','Calories burned',0,800,10,250,'kcal'],['usual','Usually, per week',0,14,1,2,'wk']] },
+  practice: { name: 'Stance holds', mode: 'practice', f: [['min','Minutes each',1,60,1,10,'min'],['usual','Usually, per week',0,14,1,3,'wk']] },
+  fruit: { name: 'Fruit & veg', mode: 'fruit', f: [['usual','Portions a week now',0,35,1,7,'n']] },
+  bed: { name: 'Bed on time', mode: 'bed', f: [['time','In bed by',0,180,15,120,'time'],['gain','Extra sleep per early night',15,120,5,45,'min'],['usual','Early nights now, per week',0,7,1,1,'wk']] }
+};
+const TYPE_ORDER = [['snack','Snack'],['dessert','Dessert'],['drink','Drink'],['exercise','Exercise'],['practice','Practice'],['fruit','Fruit & veg'],['bed','Bedtime']];
+
+/* ---------- Projection model (deliberately loose) ---------- */
+const WEEKS_TO_SUMMER = 30;
+function kgThing(kcalPerWeek) {
+  const kg = kcalPerWeek * WEEKS_TO_SUMMER / 7700 * 0.8; // 0.8 ≈ metabolic adaptation fudge
+  if (kg < 0.15) return 'barely a dent — but it adds up';
+  if (kg < 0.4) return 'a block of butter lighter';
+  if (kg < 1.5) return 'a bag of sugar lighter';
+  if (kg < 3.5) return 'a bag of potatoes lighter';
+  if (kg < 7) return 'a bowling ball lighter';
+  return 'a full suitcase lighter';
+}
+function moneyThing(gbp) {
+  if (gbp < 15) return null;
+  if (gbp < 40) return 'a takeaway richer';
+  if (gbp < 120) return 'a nice meal out richer';
+  if (gbp < 350) return 'a weekend away richer';
+  if (gbp < 900) return 'a long weekend in Europe richer';
+  return 'a proper holiday richer';
+}
+function fmt(u, v) {
+  if (u === 'kcal') return v + ' kcal';
+  if (u === 'gbp') return '£' + Number(v).toFixed(2);
+  if (u === 'wk') return v + ' a week';
+  if (u === 'min') return v + ' min';
+  if (u === 'time') { const m = 21 * 60 + Number(v); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+  return String(v);
+}
+
+/* ---------- State & routing ---------- */
+const params = new URLSearchParams(location.search);
+const state = {
+  screen: params.get('screen') || 'home',
+  mood: params.get('mood') || 'ahead',
+  v: Number(params.get('v') || 0), drag: false, choice: params.get('choice') || null,
+  type: params.get('type') || 'snack', vals: null, name: null
+};
+function go(screen) { state.screen = screen; state.v = 0; state.choice = null; state.drag = false; render(); }
+const clamp = (x) => Math.max(-1, Math.min(1, x));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+/* ---------- Home ---------- */
+function spark(trend) {
+  const P = { up: ['var(--good)', 'M2 18 C 14 17, 26 10, 42 3'], flat: ['#8A8F96', 'M2 15 C 14 15, 28 14, 42 14'], down: ['var(--bad)', 'M2 15 C 12 6, 20 4, 26 7 C 32 10, 38 14, 42 16'] }[trend];
+  return `<svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"/><path d="${P[1]}" fill="none" stroke="${P[0]}" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+}
+function hero(ahead) {
+  const bg = ahead ? 'var(--dark)' : '#3A1412', acc = ahead ? 'var(--good-on-dark)' : 'var(--bad-on-dark)';
+  const you = ahead ? 'M6 100 C 90 96, 170 50, 262 14' : 'M6 100 C 60 70, 110 52, 150 60 C 200 72, 230 90, 262 96';
+  const chips = ahead ? ['lighter', 'a weekend away', 'stronger'] : ['a lighter summer', 'a weekend away', 'strength'];
+  return `<div style="background:${bg};color:#F5F3EE;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px">
+    <div style="font-family:var(--display);font-size:32px;font-weight:700;line-height:1.05;letter-spacing:-0.5px">${ahead ? 'You’re pulling away from the old you.' : 'You’re drifting back to the old you.'}</div>
+    <svg width="310" height="128" viewBox="0 0 310 128" role="img" aria-label="${ahead ? 'Your line climbing away from the old-you line' : 'Your line falling back towards the old-you line'}">
+      <path d="${you} L 262 98 C 200 99, 100 100, 6 100 Z" fill="${acc}" opacity="0.18"/>
+      <path d="M6 100 C 100 100, 200 99, 262 98" fill="none" stroke="#8A8F96" stroke-width="2" stroke-dasharray="6 6" stroke-linecap="round"/>
+      <path d="${you}" fill="none" stroke="${acc}" stroke-width="4" stroke-linecap="round"/>
+      <text x="266" y="102" font-size="12" fill="#B9BDC4">old you</text>
+      <text x="150" y="${ahead ? 86 : 48}" font-size="13" font-weight="600" fill="${acc}">${ahead ? 'that gap is you' : 'the gap is closing'}</text>
+      <text x="6" y="124" font-size="11" fill="#8A8F96">now</text><text x="236" y="124" font-size="11" fill="#8A8F96">summer</text>
+    </svg>
+    <div style="font-size:13px;color:var(--dark-muted)">${ahead ? 'By summer, that gap is:' : 'By summer, you’re throwing away:'}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;color:${acc}">${chips.map(c => `<span class="chip">${c}</span>`).join('')}</div>
+  </div>`;
+}
+function home() {
+  return `<div class="phone">
+    <h1 style="font-size:22px">Make It Count</h1>
+    ${hero(state.mood !== 'slipping')}
+    <div style="font-size:14px;font-weight:600" class="muted">Tap before you choose</div>
+    <div class="grid2">
+      ${HOME_TILES.map(([n, fact, t, link]) => `<button class="tile" ${link ? `data-go="${link}"` : ''}>
+        <span class="tile-name">${esc(n)}${spark(t)}</span>
+        <span style="font-size:13px;color:${t === 'down' ? 'var(--bad)' : 'var(--muted)'}">${fact}</span></button>`).join('')}
+      <button class="tile" data-go="add" style="border:1.5px dashed #B9B3A6;background:transparent;align-items:center;justify-content:center;font-weight:600;font-size:15px">+ Add a lever</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- Decision (drag NOW, watch summer move) ---------- */
+function decisionModel(L) {
+  const v = state.v, c = state.choice, B = L.base, idle = Math.abs(v) < 0.05;
+  const e = v >= 0 ? B + v * (1 - B) : B + v * (1 + B);      // effective summer position
+  const mag = Math.abs(e), good = e > 0, flat = mag < 0.08;
+  const ny = Math.round(150 - v * 50), ey = Math.round(150 - e * 118), eyb = Math.round(150 - B * 118);
+  const pick = (arr) => { for (const [t, w] of arr) if (mag <= t) return w; return arr[arr.length - 1][1]; };
+  const col = flat ? '#5B6068' : (good ? 'var(--good)' : 'var(--bad)');
+  const head = c === 'y' ? L.yesHead : c === 'n' ? L.noHead : idle ? L.q : (v > 0 ? L.goodHead : L.badHead);
+  const headCol = (c === 'n' || (!c && !idle && v < 0)) ? 'var(--bad)' : (c === 'y' || (!c && !idle && v > 0)) ? 'var(--good)' : 'var(--ink)';
+  return { v, c, idle, e, mag, good, flat, ny, ey, eyb, col, head, headCol,
+    line: `M40 ${ny} C 120 ${ny}, 210 ${Math.round((ny + ey) / 2)}, 300 ${ey}`,
+    base: `M40 150 C 120 150, 210 ${Math.round((150 + eyb) / 2)}, 300 ${eyb}`,
+    proj: flat ? 'You, much the same as now.' : 'You, ' + pick(good ? L.good : L.bad) + '.',
+    projSub: flat ? '' : (good ? L.goodSub : L.badSub),
+    projLabel: idle ? 'On your current pace, by summer:' : 'If this becomes your habit, by summer:' };
+}
+function decision(key) {
+  const L = LEVERS[key], m = decisionModel(L);
+  const panelBg = m.flat ? 'var(--card)' : (m.good ? 'var(--good)' : 'var(--bad)');
+  const panelFg = m.flat ? 'var(--ink)' : '#fff', panelMuted = m.flat ? 'var(--muted)' : '#F1F1EE';
+  return `<div class="phone" style="gap:12px">
+    <a href="#" class="back" data-go="home">← Levers</a>
+    <h1 style="font-size:32px;letter-spacing:-0.8px;line-height:1.05;min-height:68px;color:${m.headCol}">${m.head}</h1>
+    <div class="muted" style="font-size:15px">Grab NOW and move it. Watch summer-you move with it.</div>
+    <div class="card" style="border-radius:24px;overflow:hidden">
+      <svg class="drag" id="drag" width="350" height="270" viewBox="0 15 350 270" role="img" aria-label="Drag NOW up or down; the summer end of your line moves further">
+        <rect x="0" y="0" width="350" height="150" fill="#1B6B4F" opacity="0.05"/>
+        <rect x="0" y="150" width="350" height="150" fill="#C0362C" opacity="0.05"/>
+        <text x="20" y="34" font-family="var(--display)" font-size="16" font-weight="700" fill="var(--good)">${L.top}</text>
+        <text x="20" y="278" font-family="var(--display)" font-size="16" font-weight="700" fill="var(--bad)">${L.bot}</text>
+        <text x="20" y="54" font-size="12" fill="var(--good)">${L.upHint}</text>
+        <text x="20" y="258" font-size="12" fill="var(--bad)">${L.downHint}</text>
+        <path d="${m.line} L 300 150 L 40 150 Z" fill="${m.col}" opacity="${(0.06 + m.mag * 0.24).toFixed(2)}"/>
+        <path d="M40 150 H300" stroke="var(--ghost)" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>
+        <text x="150" y="${m.e >= 0 ? 168 : 140}" font-size="12" fill="var(--muted)">old you</text>
+        <path d="${m.base}" fill="none" stroke="var(--good)" stroke-width="3" stroke-linecap="round" opacity="${m.idle ? 0 : 0.35}"/>
+        <text x="296" y="${m.eyb - 12}" text-anchor="end" font-size="11" fill="var(--good)" opacity="${m.idle ? 0 : 0.6}">your current path</text>
+        <path d="${m.line}" fill="none" stroke="${m.col}" stroke-width="5" stroke-linecap="round"/>
+        <path d="M318 150 h8 V ${m.ey} h-8" fill="none" stroke="${m.col}" stroke-width="2" opacity="${m.flat ? 0 : 1}"/>
+        <circle cx="300" cy="${m.ey}" r="9" fill="${m.col}"/>
+        <text x="294" y="${m.e >= 0 ? Math.max(m.ey - 16, 36) : Math.min(m.ey + 32, 280)}" text-anchor="end" font-family="var(--display)" font-size="20" font-weight="700" fill="${m.col}">${m.flat ? '' : (m.good ? L.top : L.bot)}</text>
+        <circle cx="40" cy="${m.ny}" r="22" fill="#fff" stroke="var(--ink)" stroke-width="4"/>
+        <circle cx="40" cy="${m.ny}" r="8" fill="var(--ink)"/>
+        <text x="40" y="${m.ny - 30}" text-anchor="middle" font-family="var(--display)" font-size="13" font-weight="700" fill="var(--ink)">NOW</text>
+      </svg>
+      <div style="display:flex;justify-content:space-between;padding:6px 18px 12px 26px;font-size:12px;border-top:1px solid #ECE8E0" class="muted">
+        <b style="color:var(--ink)">now</b><span>Jan</span><span>Mar</span><span>May</span><b style="color:var(--ink)">summer</b>
+      </div>
+    </div>
+    <div style="background:${panelBg};border-radius:20px;padding:16px 18px;display:flex;flex-direction:column;gap:4px">
+      <div style="font-size:13px;color:${panelMuted}">${m.projLabel}</div>
+      <div style="font-family:var(--display);font-size:24px;font-weight:700;line-height:1.15;color:${panelFg}">${m.proj}</div>
+      ${m.projSub ? `<div style="font-size:14px;color:${panelMuted}">${m.projSub}</div>` : ''}
+    </div>
+    ${m.c ? `<div style="background:${m.c === 'y' ? 'var(--good)' : 'var(--bad)'};color:#fff;border-radius:22px;padding:18px 20px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:16px">${m.c === 'y' ? L.yesText : L.noText}</div>
+      <button data-undo style="font:inherit;font-size:14px;color:#fff;background:transparent;border:1px solid #fff;border-radius:12px;padding:10px 16px;align-self:flex-start;min-height:44px;cursor:pointer">Undo</button>
+    </div>` : ''}
+  </div>`;
+}
+const yOf = (ev) => { const el = document.getElementById('drag'); const r = el.getBoundingClientRect(); return 15 + (ev.clientY - r.top) / r.height * 270; };
+function endDrag() {
+  if (!state.drag) return; state.drag = false;
+  if (state.v > 0.6) { state.v = 1; state.choice = 'y'; if (navigator.vibrate) navigator.vibrate(30); }
+  else if (state.v < -0.6) { state.v = -1; state.choice = 'n'; if (navigator.vibrate) navigator.vibrate([20, 40, 20]); }
+  else state.v = 0;
+  render();
+}
+/* ---------- Add a lever ---------- */
+function defaults(t) { const v = {}; TYPES[t].f.forEach(x => { v[x[0]] = x[5]; }); return v; }
+function addProjection(t, v) {
+  if (t.mode === 'avoid') { const h = v.usual / 2, m = moneyThing(h * v.cost * WEEKS_TO_SUMMER);
+    return ['Skip half of them, and summer-you is…', [kgThing(h * v.kcal), m].filter(Boolean)]; }
+  if (t.mode === 'exercise') return ['One more a week, and summer-you is…', [kgThing(v.kcal * 0.6), 'fitter and stronger']];
+  if (t.mode === 'practice') return ['One more a week, and summer-you is…', ['stronger legs', 'better balance']];
+  if (t.mode === 'fruit') return ['One more a day, and by summer…', ['more energy in the afternoons', 'a couple of hundred more portions']];
+  return ['Two more early nights a week, and by summer…', ['fewer foggy mornings', 'an extra week of sleep banked']];
+}
+function addProjHTML() {
+  const [head, lines] = addProjection(TYPES[state.type], state.vals);
+  return `<div style="font-size:14px;color:var(--dark-muted)">${head}</div>` +
+    lines.map(x => `<div style="font-family:var(--display);font-size:22px;font-weight:600;line-height:1.25">${x}</div>`).join('');
+}
+function addLever() {
+  if (!state.vals) { state.vals = defaults(state.type); state.name = TYPES[state.type].name; }
+  const t = TYPES[state.type], v = state.vals;
+  return `<div class="phone" style="gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1 style="font-size:28px">New lever</h1><a href="#" data-go="home" style="font-size:14px;text-decoration:none;padding:10px 0">Cancel</a>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">${TYPE_ORDER.map(([k, l]) => `<button class="pill ${k === state.type ? 'on' : ''}" data-type="${k}">${esc(l)}</button>`).join('')}</div>
+    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px" class="muted">Name
+      <input id="name" type="text" value="${esc(state.name)}" style="font:inherit;font-size:16px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px">
+    </label>
+    <div class="card" style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+      ${t.f.map(([k, l, mn, mx, st, d, u]) => `<label style="display:flex;flex-direction:column;gap:4px">
+        <span style="display:flex;justify-content:space-between;font-size:14px"><span>${l}</span><b id="val-${k}">${fmt(u, v[k])}</b></span>
+        <input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" value="${v[k]}"></label>`).join('')}
+      <div class="muted" style="font-size:12px">Typical values to start. Close enough is fine.</div>
+    </div>
+    <div id="addproj" style="background:var(--dark);color:#F5F3EE;border-radius:22px;padding:18px 20px;display:flex;flex-direction:column;gap:6px">${addProjHTML()}</div>
+    <a href="#" class="btn-primary" data-go="home">Add lever</a>
+  </div>`;
+}
+
+/* ---------- Render (events are delegated, so re-rendering mid-gesture is safe) ---------- */
+const app = document.getElementById('app');
+function render() {
+  app.innerHTML = state.screen === 'snack' ? decision('snack') : state.screen === 'holds' ? decision('holds') : state.screen === 'add' ? addLever() : home();
+}
+app.addEventListener('click', (e) => {
+  const g = e.target.closest('[data-go]'); if (g) { e.preventDefault(); go(g.dataset.go); return; }
+  if (e.target.closest('[data-undo]')) { state.choice = null; state.v = 0; render(); return; }
+  const t = e.target.closest('[data-type]'); if (t) { state.type = t.dataset.type; state.vals = defaults(state.type); state.name = TYPES[state.type].name; render(); }
+});
+app.addEventListener('input', (e) => {
+  const r = e.target;
+  if (r.id === 'name') { state.name = r.value; return; }
+  if (r.dataset && r.dataset.k) {
+    state.vals[r.dataset.k] = Number(r.value);
+    const f = TYPES[state.type].f.find(x => x[0] === r.dataset.k);
+    document.getElementById('val-' + r.dataset.k).textContent = fmt(f[6], state.vals[r.dataset.k]);
+    document.getElementById('addproj').innerHTML = addProjHTML();
+  }
+});
+app.addEventListener('pointerdown', (ev) => {
+  if (!ev.target.closest('#drag') || state.choice) return;
+  ev.preventDefault(); state.drag = true; state.v = clamp((150 - yOf(ev)) / 50); render();
+});
+window.addEventListener('pointermove', (ev) => { if (!state.drag) return; state.v = clamp((150 - yOf(ev)) / 50); render(); });
+window.addEventListener('pointerup', endDrag);
+window.addEventListener('pointercancel', endDrag);
+render();
+</script>
+</body>
+</html>

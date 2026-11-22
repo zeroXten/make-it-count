@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Snack decision</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#16181B}a:hover{color:#1B6B4F}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 24px 20px; background: #F5F3EE; font-family: Inter, sans-serif; color: #16181B; display: flex; flex-direction: column; gap: 12px">
+  <a href="Main.dc.html" style="font-size: 14px; font-weight: 500; text-decoration: none; padding: 10px 0; align-self: flex-start">← Levers</a>
+  <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.8px; line-height: 1.05; min-height: 68px; color: {{headCol}}">{{head}}</h1>
+  <div style="font-size: 15px; color: #5B6068">Grab NOW and move it. Watch summer-you move with it.</div>
+  <div style="background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 24px; overflow: hidden">
+    <svg width="350" height="270" viewBox="0 15 350 270" role="img" aria-label="Drag summer-you: up toward lighter to skip the snack, down toward heavier to have it" onPointerDown="{{down}}" onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{up}}" style="display: block; touch-action: none; cursor: grab">
+      <rect x="0" y="0" width="350" height="150" fill="#1B6B4F" opacity="0.05"></rect>
+      <rect x="0" y="150" width="350" height="150" fill="#C0362C" opacity="0.05"></rect>
+      <text x="20" y="30" font-family="'Space Grotesk', sans-serif" font-size="16" font-weight="700" fill="#1B6B4F">lighter</text>
+      <text x="20" y="282" font-family="'Space Grotesk', sans-serif" font-size="16" font-weight="700" fill="#C0362C">heavier</text>
+      <text x="20" y="54" font-family="Inter, sans-serif" font-size="12" fill="#1B6B4F">↑ skip it</text>
+      <text x="20" y="258" font-family="Inter, sans-serif" font-size="12" fill="#C0362C">↓ have it</text>
+      <path d="{{area}}" fill="{{col}}" opacity="{{areaOpacity}}"></path>
+      <path d="M40 150 H300" stroke="#9A9EA5" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"></path>
+      <text x="150" y="{{oldY}}" font-family="Inter, sans-serif" font-size="12" fill="#5B6068">old you</text>
+      <path d="{{basePath}}" fill="none" stroke="#1B6B4F" stroke-width="3" stroke-linecap="round" opacity="{{baseOp}}"></path>
+      <text x="296" y="{{baseLabelY}}" text-anchor="end" font-family="Inter, sans-serif" font-size="11" fill="#1B6B4F" opacity="{{baseOp}}">your current path</text>
+      <path d="{{line}}" fill="none" stroke="{{col}}" stroke-width="5" stroke-linecap="round"></path>
+      <circle cx="300" cy="{{ey}}" r="9" fill="{{col}}"></circle>
+      <circle cx="40" cy="{{ny}}" r="22" fill="#FFFFFF" stroke="#16181B" stroke-width="4"></circle>
+      <circle cx="40" cy="{{ny}}" r="8" fill="#16181B"></circle>
+      <text x="40" y="{{nowLabelY}}" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="13" font-weight="700" fill="#16181B">NOW</text>
+      <text x="294" y="{{labelY}}" text-anchor="end" font-family="'Space Grotesk', sans-serif" font-size="20" font-weight="700" fill="{{col}}">{{word}}</text>
+      <path d="M318 150 h8 V {{bracketY}} h-8" fill="none" stroke="{{col}}" stroke-width="2" opacity="{{bracketOp}}"></path>
+    </svg>
+    <div style="display: flex; justify-content: space-between; padding: 6px 18px 12px 26px; font-size: 12px; color: #5B6068; border-top: 1px solid #ECE8E0">
+      <span style="font-weight: 700; color: #16181B">now</span><span>Jan</span><span>Mar</span><span>May</span><span style="font-weight: 700; color: #16181B">summer</span>
+    </div>
+  </div>
+  <div style="background: {{projBg}}; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+    <div style="font-size: 13px; color: {{projLabelCol}}">{{projLabel}}</div>
+    <div style="font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; line-height: 1.15; color: {{projCol}}">{{proj}}</div>
+    <div style="font-size: 14px; color: {{projLabelCol}}">{{projSub}}</div>
+  </div>
+  <sc-if value="{{saidYes}}" hint-placeholder-val="{{false}}">
+    <div style="background: #1B6B4F; color: #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 16px">Skipped. Clothes that fit better, more energy, less puffed on the stairs. That’s what you just chose.</div>
+      <button type="button" onClick="{{undo}}" style="font: inherit; font-size: 14px; color: #FFFFFF; background: transparent; border: 1px solid #FFFFFF; border-radius: 12px; padding: 10px 16px; align-self: flex-start; cursor: pointer; min-height: 44px">Undo</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{saidNo}}" hint-placeholder-val="{{false}}">
+    <div style="background: #C0362C; color: #FFFFFF; border-radius: 22px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 16px">Had it. You just pulled summer-you down. Make the next one count.</div>
+      <button type="button" onClick="{{undo}}" style="font: inherit; font-size: 14px; color: #FFFFFF; background: transparent; border: 1px solid #FFFFFF; border-radius: 12px; padding: 10px 16px; align-self: flex-start; cursor: pointer; min-height: 44px">Undo</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+const CFG = {"q": "Snack?", "sub": "Grab NOW and move it. Watch summer-you move with it.", "goodHead": "You just changed summer.", "badHead": "You just changed summer. For the worse.", "yesHead": "Lighter by summer.", "noHead": "Heavier by summer.", "idleWord": "summer-you", "goodWord": "lighter", "badWord": "heavier", "topZone": "lighter", "botZone": "heavier", "upHint": "\u2191 skip it", "downHint": "\u2193 have it", "yesBtn": "Skip it", "noBtn": "Have it", "yesText": "Skipped. Clothes that fit better, more energy, less puffed on the stairs. That\u2019s what you just chose.", "noText": "Had it. You just pulled summer-you down. Make the next one count.", "aria": "Drag summer-you: up toward lighter to skip the snack, down toward heavier to have it", "idleProj": "Right now, you\u2019re deciding who turns up in summer.", "good": [[0.45, "a block of butter lighter"], [0.8, "nearly a bag of sugar lighter"], [2, "a bag of sugar lighter"]], "bad": [[0.45, "a block of butter heavier"], [0.8, "nearly a bag of sugar heavier"], [2, "a bag of sugar heavier"]], "goodSub": "Clothes fit better. More energy. Less puffed on the stairs.", "badSub": "Tighter jeans. Less energy. Same summer as last year, only heavier.", "base": 0.5};
+function clamp(x) { return Math.max(-1, Math.min(1, x)); }
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { v: 0, drag: false, c: null }; }
+  renderVals() {
+    const v = this.state.v, c = this.state.c, B = CFG.base, idle = Math.abs(v) < 0.05;
+    const e = v >= 0 ? B + v * (1 - B) : B + v * (1 + B), mag = Math.abs(e), good = e > 0;
+    const ny = Math.round(150 - v * 50), ey = Math.round(150 - e * 118), eyb = Math.round(150 - B * 118);
+    const line = 'M40 ' + ny + ' C 120 ' + ny + ', 210 ' + Math.round((ny + ey) / 2) + ', 300 ' + ey;
+    const basePath = 'M40 150 C 120 150, 210 ' + Math.round((150 + eyb) / 2) + ', 300 ' + eyb;
+    const col = mag < 0.08 ? '#5B6068' : (good ? '#1B6B4F' : '#C0362C');
+    const vgood = v > 0;
+    const head = c === 'y' ? CFG.yesHead : c === 'n' ? CFG.noHead : idle ? CFG.q : (vgood ? CFG.goodHead : CFG.badHead);
+    const yOf = (ev) => { const r = ev.currentTarget.getBoundingClientRect(); return 15 + (ev.clientY - r.top) / r.height * 270; };
+    const pick = (arr) => { for (const [t, w] of arr) if (mag <= t) return w; return arr[arr.length - 1][1]; };
+    return {
+      line, basePath, baseOp: idle ? 0 : 0.35, baseLabelY: eyb - 12,
+      bracketY: ey, bracketOp: mag < 0.08 ? 0 : 1, proj: mag < 0.08 ? 'You, much the same as now.' : 'You, ' + pick(good ? CFG.good : CFG.bad) + '.',
+      projSub: mag < 0.08 ? '' : (good ? CFG.goodSub : CFG.badSub),
+      projLabel: idle ? 'On your current pace, by summer:' : 'If this becomes your habit, by summer:',
+      projBg: mag < 0.08 ? '#FFFFFF' : (good ? '#1B6B4F' : '#C0362C'), projCol: mag < 0.08 ? '#16181B' : '#FFFFFF', projLabelCol: mag < 0.08 ? '#5B6068' : '#F1F1EE',
+      area: line + ' L 300 150 L 40 150 Z', col, areaOpacity: (0.06 + mag * 0.24).toFixed(2), ey, ny, nowLabelY: ny - 30, summerLabelY: e >= 0 ? Math.min(ey + 28, 140) : Math.max(ey - 18, 162), oldY: e >= 0 ? 168 : 140,
+      labelY: e >= 0 ? Math.max(ey - 16, 36) : Math.min(ey + 32, 280), word: mag < 0.08 ? '' : (good ? CFG.goodWord : CFG.badWord),
+      head, headCol: c === 'n' || (!c && !idle && !vgood) ? '#C0362C' : (c === 'y' || (!c && !idle && vgood) ? '#1B6B4F' : '#16181B'),
+      open: c === null, saidYes: c === 'y', saidNo: c === 'n',
+      down: (e) => { if (this.state.c) return; e.currentTarget.setPointerCapture(e.pointerId); this.setState({ drag: true, v: clamp((150 - yOf(e)) / 50) }); },
+      move: (e) => { if (!this.state.drag) return; this.setState({ v: clamp((150 - yOf(e)) / 50) }); },
+      up: () => { if (!this.state.drag) return; const x = this.state.v;
+        if (x > 0.6) this.setState({ drag: false, v: 1, c: 'y' });
+        else if (x < -0.6) this.setState({ drag: false, v: -1, c: 'n' });
+        else this.setState({ drag: false, v: 0 }); },
+      yes: () => this.setState({ v: 1, c: 'y' }), no: () => this.setState({ v: -1, c: 'n' }),
+      undo: () => this.setState({ v: 0, c: null, drag: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

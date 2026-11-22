@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tomorrow-you home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#16181B}a:hover{color:#1B6B4F}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; padding: 22px 20px; background: #F5F3EE; font-family: Inter, sans-serif; color: #16181B; display: flex; flex-direction: column; gap: 14px">
+  <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700">Tomorrow-you</h1>
+  <sc-if value="{{ahead}}" hint-placeholder-val="{{true}}">
+    <div style="background: #16181B; color: #F5F3EE; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; line-height: 1.05; letter-spacing: -0.5px">You’re pulling away from the old you.</div>
+      <svg width="310" height="128" viewBox="0 0 310 128" role="img" aria-label="Your line climbing well away from the dashed old-you line by summer">
+        <path d="M6 100 C 90 96, 170 50, 262 14 L 262 98 C 200 99, 100 100, 6 100 Z" fill="#7FD1AE" opacity="0.18"></path>
+        <path d="M6 100 C 100 100, 200 99, 262 98" fill="none" stroke="#8A8F96" stroke-width="2" stroke-dasharray="6 6" stroke-linecap="round"></path>
+        <path d="M6 100 C 90 96, 170 50, 262 14" fill="none" stroke="#7FD1AE" stroke-width="4" stroke-linecap="round"></path>
+        <text x="266" y="102" font-size="12" fill="#B9BDC4" font-family="Inter, sans-serif">old you</text>
+        <text x="150" y="86" font-size="13" font-weight="600" fill="#7FD1AE" font-family="Inter, sans-serif">that gap is you</text>
+        <text x="6" y="124" font-size="11" fill="#8A8F96" font-family="Inter, sans-serif">now</text>
+        <text x="236" y="124" font-size="11" fill="#8A8F96" font-family="Inter, sans-serif">summer</text>
+      </svg>
+      <div style="font-size: 13px; color: #B9BDC4">By summer, that gap is:</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px"><span style="font-size: 12px; font-weight: 600; color: #7FD1AE; border: 1px solid #7FD1AE; border-radius: 999px; padding: 5px 8px">lighter</span><span style="font-size: 12px; font-weight: 600; color: #7FD1AE; border: 1px solid #7FD1AE; border-radius: 999px; padding: 5px 8px">a weekend away</span><span style="font-size: 12px; font-weight: 600; color: #7FD1AE; border: 1px solid #7FD1AE; border-radius: 999px; padding: 5px 8px">stronger</span></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{slipping}}" hint-placeholder-val="{{false}}">
+    <div style="background: #3A1412; color: #F5F3EE; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; line-height: 1.05; letter-spacing: -0.5px">You’re drifting back to the old you.</div>
+      <svg width="310" height="128" viewBox="0 0 310 128" role="img" aria-label="Your line rose, then is falling back towards the dashed old-you line">
+        <path d="M6 100 C 60 70, 110 52, 150 60 C 200 72, 230 90, 262 96 L 262 98 C 200 99, 100 100, 6 100 Z" fill="#FF8A7A" opacity="0.18"></path>
+        <path d="M6 100 C 100 100, 200 99, 262 98" fill="none" stroke="#8A8F96" stroke-width="2" stroke-dasharray="6 6" stroke-linecap="round"></path>
+        <path d="M6 100 C 60 70, 110 52, 150 60 C 200 72, 230 90, 262 96" fill="none" stroke="#FF8A7A" stroke-width="4" stroke-linecap="round"></path>
+        <text x="266" y="102" font-size="12" fill="#B9BDC4" font-family="Inter, sans-serif">old you</text>
+        <text x="150" y="48" font-size="13" font-weight="600" fill="#FF8A7A" font-family="Inter, sans-serif">the gap is closing</text>
+        <text x="6" y="124" font-size="11" fill="#8A8F96" font-family="Inter, sans-serif">now</text>
+        <text x="236" y="124" font-size="11" fill="#8A8F96" font-family="Inter, sans-serif">summer</text>
+      </svg>
+      <div style="font-size: 13px; color: #B9BDC4">By summer, you’re throwing away:</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px"><span style="font-size: 12px; font-weight: 600; color: #FF8A7A; border: 1px solid #FF8A7A; border-radius: 999px; padding: 5px 8px">a lighter summer</span><span style="font-size: 12px; font-weight: 600; color: #FF8A7A; border: 1px solid #FF8A7A; border-radius: 999px; padding: 5px 8px">a weekend away</span><span style="font-size: 12px; font-weight: 600; color: #FF8A7A; border: 1px solid #FF8A7A; border-radius: 999px; padding: 5px 8px">strength</span></div>
+    </div>
+  </sc-if>
+  <div style="font-size: 14px; font-weight: 600; color: #5B6068">Tap before you choose</div>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <a href="Decision.dc.html" style="text-decoration: none; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; min-height: 44px"><span style="display: flex; justify-content: space-between; align-items: center; gap: 6px"><span style="font-weight: 600; font-size: 16px">Snack</span><svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"></path><path d="M2 18 C 14 17, 26 10, 42 3" fill="none" stroke="#1B6B4F" stroke-width="2.5" stroke-linecap="round"></path></svg></span><span style="font-size: 13px; color: #5B6068">9 skipped this month</span></a>
+    <button type="button" style="font: inherit; text-align: left; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; cursor: pointer"><span style="display: flex; justify-content: space-between; align-items: center; gap: 6px"><span style="font-weight: 600; font-size: 16px">Dessert</span><svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"></path><path d="M2 15 C 14 15, 28 14, 42 14" fill="none" stroke="#8A8F96" stroke-width="2.5" stroke-linecap="round"></path></svg></span><span style="font-size: 13px; color: #5B6068">No change yet</span></button>
+    <button type="button" style="font: inherit; text-align: left; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; cursor: pointer"><span style="display: flex; justify-content: space-between; align-items: center; gap: 6px"><span style="font-weight: 600; font-size: 16px">Drink</span><svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"></path><path d="M2 18 C 14 17, 26 10, 42 3" fill="none" stroke="#1B6B4F" stroke-width="2.5" stroke-linecap="round"></path></svg></span><span style="font-size: 13px; color: #5B6068">6 nights off this month</span></button>
+    <button type="button" style="font: inherit; text-align: left; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; cursor: pointer"><span style="display: flex; justify-content: space-between; align-items: center; gap: 6px"><span style="font-weight: 600; font-size: 16px">Exercise</span><svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"></path><path d="M2 18 C 14 17, 26 10, 42 3" fill="none" stroke="#1B6B4F" stroke-width="2.5" stroke-linecap="round"></path></svg></span><span style="font-size: 13px; color: #5B6068">11 workouts this month</span></button>
+    <a href="DecisionHolds.dc.html" style="text-decoration: none; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; min-height: 44px"><span style="display: flex; justify-content: space-between; align-items: center; gap: 6px"><span style="font-weight: 600; font-size: 16px">Stance holds</span><svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"></path><path d="M2 18 C 14 17, 26 10, 42 3" fill="none" stroke="#1B6B4F" stroke-width="2.5" stroke-linecap="round"></path></svg></span><span style="font-size: 13px; color: #5B6068">16 sessions this month</span></a>
+    <button type="button" style="font: inherit; text-align: left; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; cursor: pointer"><span style="display: flex; justify-content: space-between; align-items: center; gap: 6px"><span style="font-weight: 600; font-size: 16px">Fruit &amp; veg</span><svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"></path><path d="M2 15 C 12 6, 20 4, 26 7 C 32 10, 38 14, 42 16" fill="none" stroke="#C0362C" stroke-width="2.5" stroke-linecap="round"></path></svg></span><span style="font-size: 13px; color: #C0362C">Less than last month</span></button>
+    <button type="button" style="font: inherit; text-align: left; color: #16181B; background: #FFFFFF; border: 1px solid #E4E0D8; border-radius: 16px; padding: 11px 14px; display: flex; flex-direction: column; gap: 4px; cursor: pointer"><span style="display: flex; justify-content: space-between; align-items: center; gap: 6px"><span style="font-weight: 600; font-size: 16px">Bed by 11</span><svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"></path><path d="M2 18 C 14 17, 26 10, 42 3" fill="none" stroke="#1B6B4F" stroke-width="2.5" stroke-linecap="round"></path></svg></span><span style="font-size: 13px; color: #5B6068">14 early nights this month</span></button>
+    <a href="AddLever.dc.html" style="text-decoration: none; color: #16181B; border: 1.5px dashed #B9B3A6; border-radius: 16px; padding: 11px 14px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; min-height: 44px">+ Add a lever</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mood":{"editor":"enum","options":["ahead","slipping"],"default":"ahead"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { const m = this.props.mood ?? 'ahead'; return { ahead: m === 'ahead', slipping: m === 'slipping' }; }
+}
+</script>
+</body>
+</html>
