@@ -144,7 +144,7 @@ Shown with colour only, no icons or headings. Direction colours are deliberately
 
 ### Good vs bad outcome
 
-Bold, classic **green** (`#15803D`, on dark `#4ADE80`) and **red** (`#DC2626`, on dark `#FF6B6B`): the decision chart, headline, projection panel and result card, and the home hero.
+Jade **green** (`#12805C`, on dark `#47D7A0`) and tomato **red** (`#D93A3A`, on dark `#FF6F6F`): the decision chart, headline, projection panel and result card, and the home hero.
 
 ## 6. Projection model (deliberately loose)
 

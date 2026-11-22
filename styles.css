@@ -1,7 +1,7 @@
 :root {
   --ground: #F5F3EE; --card: #FFFFFF; --ink: #16181B; --muted: #5B6068; --line: #E4E0D8;
-  --good: #15803D; --bad: #DC2626; --ghost: #9A9EA5;
-  --dark: #16181B; --dark-muted: #B9BDC4; --good-on-dark: #4ADE80; --bad-on-dark: #FF6B6B; --bad-dark-bg: #3A1412;
+  --good: #12805C; --bad: #D93A3A; --ghost: #9A9EA5;
+  --dark: #16181B; --dark-muted: #B9BDC4; --good-on-dark: #47D7A0; --bad-on-dark: #FF6F6F; --bad-dark-bg: #3A1412;
   /* Habit direction (separate from good/bad): building up = teal, cutting back = pink */
   --more: #0F766E; --more-on-dark: #2DD4BF; --less: #BE185D; --less-on-dark: #F472B6;
   --display: 'Space Grotesk', system-ui, sans-serif; --body: Inter, system-ui, -apple-system, sans-serif;

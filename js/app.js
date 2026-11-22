@@ -2,7 +2,7 @@ import { load, save, uid, isValid, requestPersist } from './storage.js';
 import { VERSION } from './version.js';
 import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview, streakInfo, leverStreaks, bankedSummary } from './model.js';
 
-const C = { good: '#15803D', bad: '#DC2626', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#4ADE80', badDark: '#FF6B6B', more: '#0F766E', less: '#BE185D' };
+const C = { good: '#12805C', bad: '#D93A3A', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#47D7A0', badDark: '#FF6F6F', more: '#0F766E', less: '#BE185D' };
 /* Direction is colour: building up = teal, cutting back = pink. Good/bad outcomes are green/red. */
 const groupOf = (l) => (TYPES[l.type] && TYPES[l.type].group) || 'more';
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
