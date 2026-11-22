@@ -74,6 +74,8 @@ svg.drag:focus-visible { outline-offset: -3px; }
 /* ---------- Add / edit ---------- */
 .form { gap: 12px; }
 .form-title { font-size: 28px; }
+.type-group { display: flex; flex-direction: column; gap: 6px; }
+.type-group-label { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .pill { font-size: 14px; border-radius: 999px; padding: 8px 13px; min-height: 40px; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
 .pill.on { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 600; }

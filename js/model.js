@@ -5,103 +5,169 @@ const DAY = 864e5;
 const MONTH = 28 * DAY;
 
 /* ---------- Lever types ----------
+   group 'less' = a habit to cut back (up means skipping it).
+   group 'more' = a habit to build up (up means doing it).
    fields: [key, label, min, max, step, default, unit]
-   mode: 'avoid' = up means skipping it; everything else = up means doing it. */
+   Outcome flags pick which everyday comparisons a type uses:
+     kcal: weight (value = how much of the calorie figure counts), cost: money, time: evenings.
+   levels: qualitative outcome by drag distance. chip: [gain, loss] words for the home hero. */
+const SKIP_UP = { up: '↑ skip it', down: '↓ have it' };
+const DO_UP = { up: '↑ do it now', down: '↓ skip it' };
+const fitLevels = (good, bad) => ({ good: [[0.45, `a bit ${good[0]}`], [0.8, `noticeably ${good[0]}`], [2, good[1]]], bad: [[0.45, `a bit ${bad[0]}`], [0.8, `noticeably ${bad[0]}`], [2, bad[1]]] });
+
 export const TYPES = {
+  /* ----- Cut back ----- */
   snack: {
-    label: 'Snack', name: 'Evening snack', mode: 'avoid',
+    group: 'less', label: 'Snacks', name: 'Snack', kcal: 1, cost: true,
     fields: [['kcal', 'Calories each', 0, 600, 10, 100, 'kcal'], ['cost', 'Cost each', 0, 5, 0.1, 0.5, 'gbp'], ['usual', 'Usually, per week', 0, 21, 1, 7, 'wk']],
-    copy: {
-      q: 'Snack?', top: 'lighter', bot: 'heavier', up: '↑ skip it', down: '↓ have it',
+    copy: { q: 'Snack?', top: 'lighter', bot: 'heavier', ...SKIP_UP, small: ['a little lighter', 'a little heavier'],
       goodSub: 'Clothes fit better. More energy. Less puffed on the stairs.',
       badSub: 'Tighter jeans. Less energy. Same summer as last year, only heavier.',
       yesText: () => 'Skipped. Clothes that fit better, more energy, less puffed on the stairs. That’s what you just chose.',
       noText: () => 'Had it. You just pulled summer-you down. Make the next one count.',
-      fact: (n) => `${n} skipped this month`
-    }
+      fact: (n) => `${n} skipped this month` }
   },
-  dessert: {
-    label: 'Dessert', name: 'Dessert', mode: 'avoid',
+  sweets: {
+    group: 'less', label: 'Sweets & desserts', name: 'Sweet treats', kcal: 1, cost: true,
     fields: [['kcal', 'Calories each', 0, 800, 10, 250, 'kcal'], ['cost', 'Cost each', 0, 8, 0.1, 0, 'gbp'], ['usual', 'Usually, per week', 0, 14, 1, 5, 'wk']],
-    copy: {
-      q: 'Dessert?', top: 'lighter', bot: 'heavier', up: '↑ skip it', down: '↓ have it',
-      goodSub: 'Clothes fit better. Steadier energy. No sugar slump.',
-      badSub: 'Tighter jeans. Sugar slumps. Same summer as last year, only heavier.',
+    copy: { q: 'Sweet treat?', top: 'lighter', bot: 'heavier', ...SKIP_UP, small: ['a little lighter', 'a little heavier'],
+      goodSub: 'Clothes fit better. Steadier energy. No sugar crash.',
+      badSub: 'Tighter jeans. Sugar crashes. Same summer as last year, only heavier.',
       yesText: () => 'Skipped. Clothes that fit better, steadier energy. That’s what you just chose.',
       noText: () => 'Had it. You just pulled summer-you down. Make the next one count.',
-      fact: (n) => `${n} skipped this month`
-    }
+      fact: (n) => `${n} skipped this month` }
   },
-  drink: {
-    label: 'Drink', name: 'Drink', mode: 'avoid',
-    fields: [['kcal', 'Calories each', 0, 400, 10, 180, 'kcal'], ['cost', 'Cost each', 0, 12, 0.1, 4.3, 'gbp'], ['usual', 'Usually, per week', 0, 28, 1, 6, 'wk']],
-    copy: {
-      q: 'Drink?', top: 'lighter', bot: 'heavier', up: '↑ night off', down: '↓ have it',
+  alcohol: {
+    group: 'less', label: 'Alcohol', name: 'Alcohol', kcal: 1, cost: true,
+    fields: [['kcal', 'Calories per drink', 0, 400, 10, 180, 'kcal'], ['cost', 'Cost per drink', 0, 15, 0.1, 5, 'gbp'], ['usual', 'Drinks, usually per week', 0, 40, 1, 6, 'wk']],
+    copy: { q: 'Drink?', top: 'lighter', bot: 'heavier', up: '↑ not this one', down: '↓ have it', small: ['a little lighter', 'a little heavier'],
       goodSub: 'Better sleep. Clearer mornings. Money in your pocket.',
       badSub: 'Heavier. Foggier mornings. Money gone.',
-      yesText: () => 'Night off. Better sleep, clearer mornings, money kept. That’s what you just chose.',
+      yesText: () => 'Skipped. Better sleep, clearer mornings, money kept. That’s what you just chose.',
       noText: () => 'Had it. You just pulled summer-you down. Make the next one count.',
-      fact: (n) => `${n} nights off this month`
-    }
+      fact: (n) => `${n} skipped this month` }
   },
+  takeaway: {
+    group: 'less', label: 'Takeaways', name: 'Takeaway', kcal: 1, cost: true,
+    fields: [['kcal', 'Extra calories vs cooking', 0, 2000, 50, 500, 'kcal'], ['cost', 'Extra cost vs cooking', 0, 60, 1, 12, 'gbp'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
+    copy: { q: 'Takeaway?', top: 'lighter', bot: 'heavier', up: '↑ cook instead', down: '↓ order it', small: ['a little lighter', 'a little heavier'],
+      goodSub: 'Lighter. Richer. Feeling better for it.',
+      badSub: 'Heavier. Poorer. Sluggish evenings.',
+      yesText: () => 'Cooking it is. Lighter, richer, feeling better. That’s what you just chose.',
+      noText: () => 'Ordered. You just pulled summer-you down. Make the next one count.',
+      fact: (n) => `${n} cooked instead this month` }
+  },
+  smoking: {
+    group: 'less', label: 'Smoking & vaping', name: 'Smoking', cost: true,
+    fields: [['cost', 'Cost each (cigarette, vape session…)', 0, 2, 0.05, 0.6, 'gbp'], ['usual', 'Usually, per week', 0, 280, 5, 70, 'wk']],
+    copy: { q: 'Smoke?', top: 'healthier', bot: 'less healthy', ...SKIP_UP, small: ['a little healthier', 'a little less healthy'],
+      ...fitLevels(['healthier', 'properly healthier'], ['wheezier', 'short of breath']),
+      goodSub: 'Easier breathing. Better taste and smell. Money kept.',
+      badSub: 'Shorter breath. Money up in smoke.',
+      yesText: () => 'Skipped. Easier breathing, money kept. That’s what you just chose.',
+      noText: () => 'Had one. You just pulled summer-you down. Make the next one count.',
+      chip: ['healthier', 'health'], fact: (n) => `${n} skipped this month` }
+  },
+  screen: {
+    group: 'less', label: 'Screen time', name: 'Scrolling', time: true,
+    fields: [['min', 'Minutes each time', 5, 180, 5, 20, 'min'], ['usual', 'Times, usually per week', 0, 70, 1, 14, 'wk']],
+    copy: { q: null, top: 'more time', bot: 'less time', up: '↑ put it down', down: '↓ carry on', small: ['a little time back', 'a little time lost'],
+      goodSub: 'Time for the things you keep putting off. Better sleep. A calmer head.',
+      badSub: 'Evenings gone to the feed, with nothing to show for them.',
+      yesText: () => 'Put down. That’s time back for things that matter. That’s what you just chose.',
+      noText: () => 'Carried on. That time doesn’t come back. Make the next one count.',
+      fact: (n) => `${n} put down this month` }
+  },
+  spending: {
+    group: 'less', label: 'Spending', name: 'Impulse buys', cost: true,
+    fields: [['cost', 'Typical cost', 0, 300, 5, 25, 'gbp'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
+    copy: { q: 'Buy it?', top: 'richer', bot: 'poorer', up: '↑ leave it', down: '↓ buy it', small: ['a little richer', 'a little poorer'],
+      goodSub: 'Money for things you actually want. Less clutter.',
+      badSub: 'Money gone on things you’ll forget you bought.',
+      yesText: () => 'Left it. That money’s going somewhere better. That’s what you just chose.',
+      noText: () => 'Bought it. You just pulled summer-you down. Make the next one count.',
+      fact: (n) => `${n} left on the shelf this month` }
+  },
+
+  /* ----- Build up ----- */
   exercise: {
-    label: 'Exercise', name: 'Workout', mode: 'exercise',
-    fields: [['min', 'Minutes each', 5, 120, 5, 30, 'min'], ['kcal', 'Calories burned', 0, 800, 10, 250, 'kcal'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
-    copy: {
-      q: 'Workout now?', top: 'fitter', bot: 'less fit', up: '↑ go now', down: '↓ skip it',
-      good: [[0.45, 'a bit fitter'], [0.8, 'noticeably fitter'], [2, 'properly fit']],
-      bad: [[0.45, 'a bit less fit'], [0.8, 'noticeably less fit'], [2, 'back to where you started']],
-      goodSub: 'Stairs without the puff. More energy. Clothes fit better.',
-      badSub: 'The fitness you built fades. Everything feels harder.',
+    group: 'more', label: 'Exercise', name: 'Exercise', kcal: 0.6, // trackers overestimate burn
+    fields: [['min', 'Minutes each', 1, 120, 1, 30, 'min'], ['kcal', 'Calories burned (0 if not sure)', 0, 800, 10, 200, 'kcal'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
+    copy: { q: null, top: 'fitter', bot: 'less fit', ...DO_UP,
+      ...fitLevels(['fitter', 'properly fit'], ['less fit', 'back to where you started']),
+      goodSub: 'More energy. A stronger body. What was hard feels easy.',
+      badSub: 'The fitness you built fades. It all feels hard again.',
       yesText: (v) => `Go. Fitter, stronger, more energy. ${v.min} minutes.`,
       noText: () => 'Skipped. That’s a session summer-you doesn’t get back.',
-      fact: (n) => `${n} workouts this month`
-    }
+      chip: ['fitter', 'fitness'], fact: (n) => `${n} sessions this month` },
+    preview: { head: 'One more a week, and summer-you is…', lines: () => ['fitter and stronger'] }
   },
-  practice: {
-    label: 'Practice', name: 'Stance holds', mode: 'practice',
-    fields: [['min', 'Minutes each', 1, 60, 1, 10, 'min'], ['usual', 'Usually, per week', 0, 14, 1, 3, 'wk']],
-    copy: {
-      q: null, top: 'stronger', bot: 'weaker', up: '↑ do it now', down: '↓ skip it',
-      good: [[0.45, 'a bit stronger'], [0.8, 'noticeably stronger'], [2, 'properly strong']],
-      bad: [[0.45, 'a bit weaker'], [0.8, 'noticeably weaker'], [2, 'back to where you started']],
-      goodSub: 'Stronger legs. Better balance. What was hard feels easy.',
-      badSub: 'The strength you built fades. It all feels hard again.',
-      yesText: (v) => `Go. Stronger, steadier, hard things getting easy. ${v.min} minutes.`,
-      noText: () => 'Skipped. That’s a day summer-you doesn’t get back.',
-      fact: (n) => `${n} sessions this month`
-    }
-  },
-  fruit: {
-    label: 'Fruit & veg', name: 'Fruit & veg', mode: 'fruit',
-    fields: [['usual', 'Portions a week now', 0, 35, 1, 7, 'n']],
-    copy: {
-      q: 'Fruit or veg instead?', top: 'more energy', bot: 'less energy', up: '↑ have some', down: '↓ skip it',
-      good: [[0.45, 'a bit brighter'], [0.8, 'noticeably more energetic'], [2, 'properly well']],
-      bad: [[0.45, 'a bit flat'], [0.8, 'noticeably sluggish'], [2, 'running on empty']],
-      goodSub: 'More energy in the afternoons. Better skin. Fewer colds.',
-      badSub: 'Afternoon slumps. More colds. Same tired summer.',
-      yesText: () => 'Done. More energy, fewer slumps. That’s what you just chose.',
-      noText: () => 'Skipped. Summer-you runs a little flatter. Make the next one count.',
-      fact: (n) => `${n} extra portions this month`
-    }
-  },
-  bed: {
-    label: 'Bedtime', name: 'Bed on time', mode: 'bed',
-    fields: [['time', 'In bed by', 0, 180, 15, 120, 'time'], ['gain', 'Extra sleep per early night', 15, 120, 5, 45, 'min'], ['usual', 'Early nights now, per week', 0, 7, 1, 1, 'wk']],
-    copy: {
-      q: 'Bed now?', top: 'sharper', bot: 'foggier', up: '↑ go to bed', down: '↓ stay up',
-      good: [[0.45, 'a bit sharper'], [0.8, 'noticeably sharper'], [2, 'properly rested']],
-      bad: [[0.45, 'a bit foggy'], [0.8, 'noticeably foggier'], [2, 'running on fumes']],
+  sleep: {
+    group: 'more', label: 'Sleep', name: 'Sleep',
+    fields: [['gain', 'Extra sleep per early night', 15, 120, 5, 45, 'min'], ['usual', 'Early nights now, per week', 0, 7, 1, 1, 'wk']],
+    copy: { q: 'Bed now?', top: 'sharper', bot: 'foggier', up: '↑ go to bed', down: '↓ stay up',
+      ...fitLevels(['sharper', 'properly rested'], ['foggier', 'running on fumes']),
       goodSub: 'Clearer mornings. Steadier moods. Better days.',
       badSub: 'Foggy mornings. Shorter fuse. Tomorrow-you pays for tonight.',
       yesText: () => 'Lights out. Clearer mornings, steadier moods. That’s what you just chose.',
       noText: () => 'Staying up. Tomorrow-you pays for tonight. Make the next one count.',
-      fact: (n) => `${n} early nights this month`
-    }
+      chip: ['better rested', 'sleep'], fact: (n) => `${n} early nights this month` },
+    preview: { head: 'Two more early nights a week, and by summer…', lines: (v, weeks) => {
+      const days = 2 * weeks * (v.gain || 45) / 60 / 24;
+      return ['fewer foggy mornings', days >= 1.5 ? `${Math.round(days)} extra days of sleep banked` : days >= 1 ? 'a full extra day of sleep banked' : 'hours of sleep banked'];
+    } }
+  },
+  fruit: {
+    group: 'more', label: 'Fruit & veg', name: 'Fruit & veg',
+    fields: [['usual', 'Portions a week now', 0, 35, 1, 7, 'n']],
+    copy: { q: 'Fruit or veg instead?', top: 'more energy', bot: 'less energy', up: '↑ have some', down: '↓ skip it',
+      ...fitLevels(['brighter', 'properly well'], ['flat', 'running on empty']),
+      goodSub: 'More energy in the afternoons. Better skin. Fewer colds.',
+      badSub: 'Afternoon slumps. More colds. Same tired summer.',
+      yesText: () => 'Done. More energy, fewer slumps. That’s what you just chose.',
+      noText: () => 'Skipped. Summer-you runs a little flatter. Make the next one count.',
+      chip: ['more energy', 'energy'], fact: (n) => `${n} extra portions this month` },
+    preview: { head: 'One more a day, and by summer…', lines: (v, weeks) => ['more energy in the afternoons', `${Math.round(weeks * 7 / 10) * 10} more portions`] }
+  },
+  learning: {
+    group: 'more', label: 'Learning', name: 'Learning',
+    fields: [['min', 'Minutes each', 5, 120, 5, 20, 'min'], ['usual', 'Usually, per week', 0, 14, 1, 3, 'wk']],
+    copy: { q: null, top: 'more skilled', bot: 'rustier', ...DO_UP,
+      ...fitLevels(['better at it', 'properly good at it'], ['rusty', 'back to where you started']),
+      goodSub: 'What was hard comes easily. Something to show for the year.',
+      badSub: 'The progress you made fades. Same as last year.',
+      yesText: (v) => `Go. ${v.min} minutes closer to properly good at it.`,
+      noText: () => 'Skipped. That’s a session summer-you doesn’t get back.',
+      chip: ['more skilled', 'progress'], fact: (n) => `${n} sessions this month` },
+    preview: { head: 'One more session a week, and by summer…', lines: () => ['noticeably better at it', 'something to show for the year'] }
+  },
+  mindfulness: {
+    group: 'more', label: 'Mindfulness', name: 'Meditation',
+    fields: [['min', 'Minutes each', 1, 60, 1, 10, 'min'], ['usual', 'Usually, per week', 0, 14, 1, 3, 'wk']],
+    copy: { q: null, top: 'calmer', bot: 'more frazzled', ...DO_UP,
+      ...fitLevels(['calmer', 'properly calm'], ['more frazzled', 'frazzled']),
+      goodSub: 'Steadier. Less reactive. Better sleep.',
+      badSub: 'More frazzled. Shorter fuse. Worse sleep.',
+      yesText: (v) => `Go. ${v.min} minutes to a calmer you.`,
+      noText: () => 'Skipped. That’s a calmer day summer-you doesn’t get.',
+      chip: ['calmer', 'calm'], fact: (n) => `${n} sessions this month` },
+    preview: { head: 'One more a week, and by summer…', lines: () => ['calmer', 'less reactive, sleeping better'] }
   }
 };
-export const TYPE_ORDER = ['snack', 'dessert', 'drink', 'exercise', 'practice', 'fruit', 'bed'];
+export const TYPE_GROUPS = [
+  ['Cut back', Object.keys(TYPES).filter(k => TYPES[k].group === 'less')],
+  ['Build up', Object.keys(TYPES).filter(k => TYPES[k].group === 'more')]
+];
+
+/* Older saves used different type keys. */
+const RENAMED = { practice: 'exercise', dessert: 'sweets', drink: 'alcohol', bed: 'sleep' };
+export function migrate(data) {
+  for (const l of data.levers) {
+    if (RENAMED[l.type]) l.type = RENAMED[l.type];
+    if (!TYPES[l.type]) l.type = 'snack';
+  }
+  return data;
+}
 
 export function defaults(type) {
   const v = {};
@@ -120,7 +186,6 @@ export function fmt(unit, v) {
   if (unit === 'gbp') return '£' + Number(v).toFixed(2);
   if (unit === 'wk') return v + ' a week';
   if (unit === 'min') return v + ' min';
-  if (unit === 'time') { const m = 21 * 60 + Number(v); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
   return String(v);
 }
 
@@ -154,27 +219,34 @@ function moneyNoun(gbp) {
   if (gbp < 900) return 'a long weekend in Europe';
   return 'a proper holiday';
 }
+function timeNoun(hours) { // counted in evenings (~3 free hours each)
+  if (hours < 1.5) return null;
+  const ev = hours / 3;
+  return ev < 1.5 ? 'an evening' : `${Math.round(ev)} evenings`;
+}
 const pickLevel = (arr, m) => { for (const [t, w] of arr) if (m <= t) return w; return arr[arr.length - 1][1]; };
+const andList = (a) => a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+
+/* Numeric outcomes for `perWeek` occurrences changed, as comparison phrases. */
+function outcomes(t, v, perWeek, good, weeks) {
+  const parts = [];
+  if (t.kcal) { const k = kgNoun(kgOf(perWeek * (v.kcal || 0) * t.kcal, weeks)); if (k) parts.push(`${k} ${good ? 'lighter' : 'heavier'}`); }
+  if (t.cost) { const g = moneyNoun(perWeek * (v.cost || 0) * weeks); if (g) parts.push(`${g} ${good ? 'richer' : 'poorer'}`); }
+  if (t.time) { const x = timeNoun(perWeek * (v.min || 0) * weeks / 60); if (x) parts.push(`${x} ${good ? 'back' : 'lost'}`); }
+  return parts;
+}
+/* A full drag = cutting out every usual occurrence, or two extra sessions a week. */
+const perWeekAt = (t, v, m) => m * (t.group === 'less' ? (v.usual || 0) : 2);
 
 /* What summer-you looks like if position e ∈ [-1, 1] becomes the habit. */
 export function projection(lever, e, weeks) {
   const t = TYPES[lever.type], c = t.copy, m = Math.abs(e), good = e > 0, v = lever.vals;
   if (m < 0.08) return { text: 'You, much the same as now.', sub: '' };
-  let phrase;
-  if (t.mode === 'avoid') {
-    const per = m * (v.usual || 0);
-    const parts = [];
-    const k = kgNoun(kgOf(per * (v.kcal || 0), weeks)); if (k) parts.push(`${k} ${good ? 'lighter' : 'heavier'}`);
-    const g = moneyNoun(per * (v.cost || 0) * weeks); if (g) parts.push(`${g} ${good ? 'richer' : 'poorer'}`);
-    phrase = parts.length ? parts.join(' and ') : (good ? 'a little lighter' : 'a little heavier');
-  } else {
-    phrase = pickLevel(good ? c.good : c.bad, m);
-    if (t.mode === 'exercise' && good) {
-      const k = kgNoun(kgOf(m * 2 * (v.kcal || 0) * 0.6, weeks)); // exercise burn counted at 60%
-      if (k) phrase += `, and ${k} lighter`;
-    }
-  }
-  return { text: `You, ${phrase}.`, sub: good ? c.goodSub : c.badSub };
+  const parts = [];
+  if (c.good) parts.push(pickLevel(good ? c.good : c.bad, m));
+  parts.push(...outcomes(t, v, perWeekAt(t, v, m), good, weeks));
+  if (!parts.length) parts.push(c.small[good ? 0 : 1]);
+  return { text: `You, ${andList(parts)}.`, sub: good ? c.goodSub : c.badSub };
 }
 
 /* ---------- History ---------- */
@@ -209,46 +281,36 @@ export function leverBase(lever, events) {
 export function heroSummary(levers, events, weeks) {
   if (!levers.length) return { state: 'empty' };
   let Y = 0, N = 0;
-  const gain = { kcal: 0, gbp: 0, q: new Set() }, loss = { kcal: 0, gbp: 0, q: new Set() };
-  const Q = { exercise: ['fitter', 'fitness'], practice: ['stronger', 'strength'], fruit: ['more energy', 'energy'], bed: ['better rested', 'sleep'] };
+  const gain = { kcal: 0, gbp: 0, hours: 0, q: new Set() }, loss = { kcal: 0, gbp: 0, hours: 0, q: new Set() };
   for (const l of levers) {
-    const { y, n } = leverStats(l, events), mode = TYPES[l.type].mode, v = l.vals;
+    const { y, n } = leverStats(l, events), t = TYPES[l.type], v = l.vals;
     Y += y; N += n;
-    for (const [count, bucket, i] of [[y, gain, 0], [n, loss, 1]]) {
+    for (const [count, b, i] of [[y, gain, 0], [n, loss, 1]]) {
       if (!count) continue;
       const perWeek = count / 4;
-      if (mode === 'avoid') { bucket.kcal += perWeek * (v.kcal || 0); bucket.gbp += perWeek * (v.cost || 0) * weeks; }
-      else {
-        if (mode === 'exercise') bucket.kcal += perWeek * (v.kcal || 0) * 0.6;
-        bucket.q.add(Q[mode][i]);
-      }
+      if (t.kcal) b.kcal += perWeek * (v.kcal || 0) * t.kcal;
+      if (t.cost) b.gbp += perWeek * (v.cost || 0) * weeks;
+      if (t.time) b.hours += perWeek * (v.min || 0) * weeks / 60;
+      if (t.copy.chip) b.q.add(t.copy.chip[i]);
     }
   }
   if (!Y && !N) return { state: 'quiet' };
   const ahead = Y >= N, b = ahead ? gain : loss;
-  const k = kgNoun(kgOf(b.kcal, weeks)), g = moneyNoun(b.gbp);
+  const k = kgNoun(kgOf(b.kcal, weeks)), g = moneyNoun(b.gbp), x = timeNoun(b.hours);
   const chips = ahead
-    ? [k && `${k} lighter`, g, ...b.q].filter(Boolean)
-    : [k && 'a lighter summer', g, ...b.q].filter(Boolean);
-  if (!chips.length) chips.push(ahead ? 'a better summer' : 'a better summer');
+    ? [k && `${k} lighter`, g, x && `${x} back`, ...b.q].filter(Boolean)
+    : [k && 'a lighter summer', g, x, ...b.q].filter(Boolean);
+  if (!chips.length) chips.push('a better summer');
   return { state: ahead ? 'ahead' : 'slipping', chips, strength: Math.min(1, 0.35 + Math.abs(Y - N) / 12) };
 }
 
-/* Add-lever live preview: "Skip half of them, and summer-you is…" */
+/* Add-lever live preview. */
 export function addPreview(type, v, weeks) {
-  const mode = TYPES[type].mode;
-  if (mode === 'avoid') {
-    const h = (v.usual || 0) / 2;
-    const k = kgNoun(kgOf(h * (v.kcal || 0), weeks)), g = moneyNoun(h * (v.cost || 0) * weeks);
-    const lines = [k ? `${k} lighter` : 'barely a dent — but it adds up', g && `${g} richer`].filter(Boolean);
-    return ['Skip half of them, and summer-you is…', lines];
+  const t = TYPES[type];
+  if (t.group === 'less') {
+    const lines = [...(t.copy.good ? [pickLevel(t.copy.good, 0.5)] : []), ...outcomes(t, v, (v.usual || 0) / 2, true, weeks)];
+    return ['Cut out half of them, and summer-you is…', lines.length ? lines : ['barely a dent — but it adds up']];
   }
-  if (mode === 'exercise') {
-    const k = kgNoun(kgOf((v.kcal || 0) * 0.6, weeks));
-    return ['One more a week, and summer-you is…', [k ? `${k} lighter` : 'a little lighter', 'fitter and stronger']];
-  }
-  if (mode === 'practice') return ['One more a week, and summer-you is…', ['stronger legs', 'better balance']];
-  if (mode === 'fruit') return ['One more a day, and by summer…', ['more energy in the afternoons', `${Math.round(weeks * 7 / 10) * 10} more portions`]];
-  const nights = Math.round(2 * weeks * (v.gain || 45) / 60 / 24 * 10) / 10;
-  return ['Two more early nights a week, and by summer…', ['fewer foggy mornings', nights >= 1 ? `${nights >= 2 ? Math.round(nights) : 'a full'} extra day${nights >= 2 ? 's' : ''} of sleep banked` : 'hours of sleep banked']];
+  const extra = outcomes(t, v, 1, true, weeks);
+  return [t.preview.head, [...t.preview.lines(v, weeks), ...extra]];
 }

@@ -1,12 +1,12 @@
 import { load, save, uid, isValid, requestPersist } from './storage.js';
-import { TYPES, TYPE_ORDER, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview } from './model.js';
+import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview } from './model.js';
 
 const C = { good: '#1B6B4F', bad: '#C0362C', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#7FD1AE', badDark: '#FF8A7A' };
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const clamp = (x) => Math.max(-1, Math.min(1, x));
 const app = document.getElementById('app');
 
-let data = load();
+let data = migrate(load());
 const persist = () => save(data);
 const H = horizon();
 
@@ -224,7 +224,8 @@ function formScreen() {
   const t = TYPES[form.type], editing = !!form.id;
   app.innerHTML = `<main class="screen form">
     <div class="row"><h1 class="form-title">${editing ? 'Edit lever' : 'New lever'}</h1><a href="${editing ? `#/lever/${form.id}` : '#/'}" class="back">Cancel</a></div>
-    ${editing ? '' : `<div class="pills" role="radiogroup" aria-label="Lever type">${TYPE_ORDER.map(k => `<button class="pill ${k === form.type ? 'on' : ''}" role="radio" aria-checked="${k === form.type}" data-type="${k}">${esc(TYPES[k].label)}</button>`).join('')}</div>`}
+    ${editing ? '' : TYPE_GROUPS.map(([label, keys]) => `<div class="type-group"><div class="type-group-label">${label}</div>
+      <div class="pills" role="radiogroup" aria-label="${label}">${keys.map(k => `<button class="pill ${k === form.type ? 'on' : ''}" role="radio" aria-checked="${k === form.type}" data-type="${k}">${esc(TYPES[k].label)}</button>`).join('')}</div></div>`).join('')}
     <label class="field">Name
       <input id="name" type="text" maxlength="40" value="${esc(form.name)}" autocomplete="off">
     </label>
@@ -277,7 +278,7 @@ async function importData(file) {
     const d = JSON.parse(await file.text());
     if (!isValid(d)) throw new Error('bad');
     if (!confirm(`Replace everything on this device with ${d.levers.length} lever(s) from the backup?`)) return;
-    data = { levers: d.levers, events: d.events }; persist(); render();
+    data = migrate({ levers: d.levers, events: d.events }); persist(); render();
   } catch { alert('That file isn’t a Make It Count backup.'); }
 }
 
@@ -325,7 +326,7 @@ function render() {
 }
 window.addEventListener('hashchange', render);
 // Another tab changed the data: pick it up.
-window.addEventListener('storage', () => { data = load(); if (!dec?.drag) render(); });
+window.addEventListener('storage', () => { data = migrate(load()); if (!dec?.drag) render(); });
 render();
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});

@@ -33,7 +33,7 @@ That sentence is the product. Every design decision should be tested against it.
 
 | Concept | Meaning |
 |---|---|
-| **Lever** | A habit the user wants to move: snack, dessert, drink, exercise, practice (e.g. stance holds), fruit & veg, bedtime. User-defined. |
+| **Lever** | A habit the user wants to move — either one to cut back (snacks, alcohol, screen time, spending…) or one to build up (exercise, sleep, learning…). Generic type, user-named. |
 | **Old you** | The baseline — what the user usually does. Always drawn as a flat dashed grey line. |
 | **Current path** | Where the user's recent behaviour (last ~4 weeks) is taking them. |
 | **Summer-you** | The projected future self at the horizon. Default horizon: next summer (a season you can picture beats "12 months"). Configurable later (holiday, birthday). |
@@ -110,15 +110,22 @@ Outcome lines — snack good: *Clothes fit better. More energy. Less puffed on t
 - Live projection card: "Skip half of them, and summer-you is… **a bag of sugar lighter** / **a nice meal out richer**".
 - Note: "Typical values to start. Close enough is fine."
 
-| Type | Defaults |
-|---|---|
-| Snack | 100 kcal, £0.50, usually 7/week |
-| Dessert | 250 kcal, £0, 5/week |
-| Drink | 100 kcal, £4.30, 6/week *(a pint is nearer 180–200 kcal — consider raising)* |
-| Exercise | 30 min, 250 kcal, 2/week |
-| Practice | 10 min, 3/week |
-| Fruit & veg | 7 portions/week |
-| Bedtime | in bed by 23:00, +45 min sleep per early night, 1/week |
+Types are generic; the user names each lever (e.g. an Exercise lever called "Bike ride"). They fall into two groups shown in the picker:
+
+| Group | Type | Defaults | Summer outcome |
+|---|---|---|---|
+| Cut back | Snacks | 100 kcal, £0.50, 7/week | weight, money |
+| Cut back | Sweets & desserts | 250 kcal, £0, 5/week | weight, money |
+| Cut back | Alcohol | 180 kcal, £5, 6 drinks/week | weight, money |
+| Cut back | Takeaways | +500 kcal, +£12 vs cooking, 2/week | weight, money |
+| Cut back | Smoking & vaping | £0.60 each, 70/week | healthier, money |
+| Cut back | Screen time | 20 min each, 14/week | evenings back |
+| Cut back | Spending | £25 each, 2/week | money |
+| Build up | Exercise | 30 min, 200 kcal (0 if unknown), 2/week | fitter, weight |
+| Build up | Sleep | +45 min per early night, 1/week | sharper |
+| Build up | Fruit & veg | 7 portions/week | more energy |
+| Build up | Learning | 20 min, 3/week | better at it |
+| Build up | Mindfulness | 10 min, 3/week | calmer |
 
 ## 6. Projection model (deliberately loose)
 
@@ -129,7 +136,8 @@ The numbers exist only to choose a comparison. They are never shown.
 - Exercise calories counted at 60% — trackers overestimate burn.
 - Weight comparisons: < 0.4 kg block of butter · < 1.5 bag of sugar · < 3.5 bag of potatoes · < 7 bowling ball · else suitcase.
 - Money comparisons: < £40 takeaway · < £120 nice meal out · < £350 weekend away · < £900 long weekend in Europe · else proper holiday.
-- Practice/sleep/fruit: qualitative outcomes only (stronger legs, fewer foggy mornings, more energy).
+- Time (screen time): hours reclaimed, counted as evenings (~3 h each): "12 evenings back".
+- Sleep/fruit/learning/mindfulness/smoking health: qualitative outcomes scaled by drag distance (a bit / noticeably / properly).
 
 ## 7. Visual language
 
