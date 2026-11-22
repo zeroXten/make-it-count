@@ -1,9 +1,9 @@
 /* Service worker: network-first with an offline cache of the app shell.
    Bump VERSION when the SHELL list changes. */
-const VERSION = 'mic-v1';
+const VERSION = 'mic-v2';
 const SHELL = [
   './', './index.html', './styles.css', './manifest.webmanifest',
-  './js/app.js', './js/model.js', './js/storage.js',
+  './js/app.js', './js/model.js', './js/storage.js', './js/version.js',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'
 ];
 const FONTS = 'mic-fonts';

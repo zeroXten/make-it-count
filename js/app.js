@@ -1,4 +1,5 @@
 import { load, save, uid, isValid, requestPersist } from './storage.js';
+import { VERSION } from './version.js';
 import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projection, tileInfo, leverBase, heroSummary, addPreview, streakInfo, leverStreaks, bankedSummary } from './model.js';
 
 const C = { good: '#1B6B4F', bad: '#C0362C', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#7FD1AE', badDark: '#FF8A7A' };
@@ -180,6 +181,7 @@ function home() {
       <span><button class="link" id="export">Back up</button> · <button class="link" id="import">Restore</button></span>
       <input type="file" id="import-file" accept="application/json,.json" hidden>
     </footer>
+    <div class="version">v${VERSION}</div>
   </main>`;
   updateInstallButton();
   wireCarousel();
@@ -204,6 +206,7 @@ function decisionShell(lever) {
     </div>
     <div class="proj" id="proj"></div>
     <div id="result" aria-live="polite"></div>
+    <div class="version">v${VERSION}</div>
   </main>`;
   paintDecision();
 }
@@ -338,6 +341,7 @@ function formScreen() {
     <div class="add-proj" id="addproj"></div>
     <button class="btn-primary" id="save">${editing ? 'Save' : 'Add lever'}</button>
     ${editing ? '<button class="btn-danger" id="delete">Delete lever</button>' : ''}
+    <div class="version">v${VERSION}</div>
   </main>`;
   paintAddProj();
 }

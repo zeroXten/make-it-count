@@ -39,3 +39,7 @@ Model: `levers[]` holds `{ id, type, name, vals, created }`. `events[]` holds `{
 ## Accessibility
 
 The decision chart is a focusable `role="slider"`. Use ↑/↓ to move NOW, Enter for Done (once past 60%), and Esc to reset. The screen reader reads out the projection text as the value.
+
+## Versioning
+
+The app version (semver) lives in `js/version.js` and shows at the bottom of every screen, so you can tell when an update has reached your phone. Bump it with every change that ships: patch for fixes, minor for features or behaviour changes, major for data/format breaks.
