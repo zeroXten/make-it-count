@@ -24,7 +24,7 @@ That sentence is the product. Every design decision should be tested against it.
 1. **Emotion over precision.** No "1.42 kg". Use everyday comparisons ("a bag of sugar lighter", "a weekend away richer", "noticeably stronger"). The maths runs underneath only to pick the right comparison.
 2. **Always show the projection.** The future line is on screen at rest, not only after interaction. A screen without a projection is broken.
 3. **Show outcomes, not inputs.** "Stronger legs, better balance" — never "a working week of practice" or "35 hours".
-4. **Up is good, everywhere.** Lines climb away from the old you. Even for weight: the chart plots *you vs the old you*, not kilograms.
+4. **The gesture matches the habit.** Building up is a drag up; cutting back is a drag down. For a cut-back habit the chart plots *how much of it you do*, so less snacking heads down into the green. Green is always the good side, whichever half it's on.
 5. **Drag, never tap.** The decision is a physical act on the graph. No tap buttons for the choice itself.
 6. **Bold, consequential copy.** Each choice should feel like it matters. Firm, not shaming — the app has to stay something you want to open.
 7. **No food diary.** Log only at the decision moment, one gesture. No calorie counting, no daily entry.
@@ -63,8 +63,8 @@ The core interaction. One per lever (snack and stance holds shown).
 2. Headline — changes live (see 5.2.2).
 3. Instruction: "Grab NOW and move it. Watch summer-you move with it."
 4. **Chart** (the control):
-   - Top half tinted green, labelled with the good outcome (*lighter* / *stronger*) and the up-gesture hint (*↑ skip it* / *↑ do it now*).
-   - Bottom half tinted red, labelled with the bad outcome (*heavier* / *weaker*) and *↓ have it* / *↓ skip it*.
+   - Build-up habits: top half tinted green, labelled with the good outcome (*stronger*) and *↑ do it now*; bottom half red, *weaker* and *↓ skip it*.
+   - Cut-back habits are mirrored: bottom half green, *lighter* and *↓ skip it*; top half red, *heavier* and *↑ have it*.
    - Dashed **old you** line across the middle.
    - **NOW handle** (large ring, left) on the user's line.
    - User's line from NOW to the **summer** end dot; area between it and old-you shaded green or red, intensity scaling with distance.
@@ -82,7 +82,8 @@ The core interaction. One per lever (snack and stance holds shown).
 - Drag NOW vertically. Handle travels ±50 px; the summer end travels ±118 px — **the amplification is the point** (small move now, big swing later).
 - Effective future position `e`:
   - `e = base + v·(1 − base)` when dragging up, `e = base + v·(1 + base)` when dragging down, where `v ∈ [−1, 1]` is handle position and `base` is the current-path position (0.5 in mocks).
-  - So: at rest the line shows the current path; full drag down drives past old-you into the red.
+  - So: at rest the line shows the current path; a full drag the bad way drives past old-you into the red.
+  - `v` is "how good". On screen it's flipped for cut-back habits, so their good drag is downward (arrow keys move NOW on screen the same way).
 - **NOW stays where you leave it.** Releasing never commits and never springs back, so you can keep adjusting: drag up, back to the middle, down, as often as you like.
 - Past ±60% the choice is **pending**: headline flips to the result ("Lighter by summer." / "Heavier by summer.") and a result card with a **Done** button appears. Back in the middle, the card disappears.
 - **Done** logs the choice (haptic: short buzz for good, double-buzz for bad) and returns home. Leaving the screen without Done logs nothing.
@@ -95,8 +96,8 @@ Only three on-screen states, and every element (headline, line, panel) follows t
 | State | When | Headline | Line end | Panel |
 |---|---|---|---|---|
 | Rest | NOW within the centre dead zone, or released there (snaps to centre) | the question ("Snack?") | your current pace | "On your current pace, by summer:" coloured by that pace |
-| Up | dragged clearly up | "You just changed summer." (green) | above old-you | green, better outcome |
-| Down | dragged clearly down | "You just changed summer. For the worse." (red) | below old-you | red, worse outcome |
+| Good | dragged clearly the good way (up to build up, down to cut back) | "You just changed summer." (green) | on the green side of old-you | green, better outcome |
+| Bad | dragged clearly the bad way | "You just changed summer. For the worse." (red) | on the red side of old-you | red, worse outcome |
 
 Dragging against your current pace brings the line back to old-you by the edge of the dead zone, so it's always on the side the headline describes. Enter/exit thresholds differ (hysteresis) so a wobbling finger can't flicker between states; projection wording only steps after a clear move.
 
@@ -105,12 +106,12 @@ Dragging against your current pace brings the line back to old-you by the edge o
 | State | Snack | Stance holds |
 |---|---|---|
 | Rest headline | Snack? | Holds now? |
-| Dragging up | You just changed summer. | You just changed summer. |
-| Dragging down | You just changed summer. For the worse. | same |
+| Dragging the good way | You just changed summer. | You just changed summer. |
+| Dragging the bad way | You just changed summer. For the worse. | same |
 | Pending good (past 60%) | Lighter by summer. | Stronger by summer. |
 | Pending bad (past 60%) | Heavier by summer. | Weaker by summer. |
 | Good result | Skipped. Clothes that fit better, more energy, less puffed on the stairs. That's what you just chose. | Timer's on. Stronger legs, better balance, hard holds getting easy. Ten minutes. |
-| Bad result | Had it. You just pulled summer-you down. Make the next one count. | Skipped. That's a day summer-you doesn't get back. I'll ask again at half one. |
+| Bad result | Had it. You just set summer-you back. Make the next one count. | Skipped. That's a day summer-you doesn't get back. I'll ask again at half one. |
 
 Projection wording scales with drag distance:
 
@@ -153,6 +154,7 @@ Shown with colour only, no icons or headings. Direction colours are deliberately
 - **Building up** (exercise, sleep, fruit & veg…): **teal** (`#0F766E`, on dark `#2DD4BF`). Streak unit *days done*, status *done today ✓*.
 - **Cutting back** (snacks, alcohol, scrolling…): **pink** (`#BE185D`, on dark `#F472B6`). Streak unit *days clear*, status *clear today ✓*.
 - Applies to home tile sparklines and the streaks card (day squares, count, status). Red still means a slip.
+- Cut-back sparklines are mirrored to match the drag: doing well heads down.
 
 ### Good vs bad outcome
 

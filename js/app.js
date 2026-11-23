@@ -5,6 +5,9 @@ import { TYPES, TYPE_GROUPS, migrate, defaults, copyFor, fmt, horizon, projectio
 const C = { good: '#12805C', bad: '#D93A3A', ink: '#16181B', muted: '#5B6068', ghost: '#9A9EA5', goodDark: '#47D7A0', badDark: '#FF6F6F', more: '#0F766E', less: '#BE185D' };
 /* Direction is colour: building up = teal, cutting back = pink. Good/bad outcomes are green/red. */
 const groupOf = (l) => (TYPES[l.type] && TYPES[l.type].group) || 'more';
+/* Which way is good on screen: build-up habits go up, cut-back habits go down.
+   The chart plots how much of the habit you do, so less snacking is a downward drag. */
+const flipOf = (l) => groupOf(l) === 'less' ? -1 : 1;
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const clamp = (x) => Math.max(-1, Math.min(1, x));
 const app = document.getElementById('app');
@@ -37,8 +40,9 @@ const nav = (hash) => { location.hash = hash; };
 
 /* ================= Home ================= */
 function spark(trend, g = 'more') {
+  // Cut-back habits are drawn mirrored: doing well heads down.
   const P = { up: [g === 'less' ? C.less : C.more, 'M2 18 C 14 17, 26 10, 42 3'], flat: ['#8A8F96', 'M2 15 C 14 15, 28 14, 42 14'], down: [C.bad, 'M2 15 C 12 6, 20 4, 26 7 C 32 10, 38 14, 42 16'] }[trend];
-  return `<svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"/><path d="${P[1]}" fill="none" stroke="${P[0]}" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+  return `<svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><g${g === 'less' ? ' transform="translate(0 22) scale(1 -1)"' : ''}><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"/><path d="${P[1]}" fill="none" stroke="${P[0]}" stroke-width="2.5" stroke-linecap="round"/></g></svg>`;
 }
 
 function hero(s) {
@@ -230,14 +234,14 @@ function summerAt(v, B) {
 }
 
 function decisionShell(lever) {
-  const c = copyFor(lever);
+  const c = copyFor(lever), f = flipOf(lever), [yesDir, noDir] = f > 0 ? ['up', 'down'] : ['down', 'up'];
   app.innerHTML = `<main class="screen decision">
     <div class="row"><a href="#/" class="back">← Levers</a><a href="#/edit/${lever.id}" class="back">Edit</a></div>
     <h1 class="dec-head" id="dec-head"></h1>
     <p class="muted dec-instr">Grab NOW and move it. Watch summer-you move with it.</p>
     <div class="card chart-card">
       <svg class="drag" id="drag" viewBox="0 15 350 270" tabindex="0" role="slider" aria-orientation="vertical"
-        aria-label="${esc(c.q)} Move NOW up to ${esc(c.up.slice(2))}, down to ${esc(c.down.slice(2))}. Press Enter for Done."
+        aria-label="${esc(c.q)} Move NOW ${yesDir} to ${esc(c.yesHint)}, ${noDir} to ${esc(c.noHint)}. Press Enter for Done."
         aria-valuemin="-100" aria-valuemax="100"></svg>
       <div class="timeline"><b>now</b>${H.ticks.map(t => `<span>${t}</span>`).join('')}<b>summer</b></div>
     </div>
@@ -249,14 +253,15 @@ function decisionShell(lever) {
 }
 
 function decisionModel(lever) {
-  const c = copyFor(lever), B = leverBase(lever, data.events);
+  const c = copyFor(lever), B = leverBase(lever, data.events), f = flipOf(lever);
   const v = dec.v, e = summerAt(v, B);
   settle();
   const ch = pending(), idle = dec.zone === 'rest';
   // One state drives everything: at rest it's your current pace (B); otherwise it's the drag direction.
   const sign = idle ? (Math.abs(B) < 0.08 ? 0 : Math.sign(B)) : (dec.zone === 'up' ? 1 : -1);
   const good = sign > 0, flat = sign === 0, mag = Math.abs(e);
-  const ny = Math.round(150 - v * 50), ey = Math.round(150 - e * 118), eyb = Math.round(150 - B * 118);
+  // v, e and B are "how good" (+1 best); f turns that into screen direction.
+  const ny = Math.round(150 - f * v * 50), ey = Math.round(150 - f * e * 118), eyb = Math.round(150 - f * B * 118);
   const col = flat ? C.muted : (good ? C.good : C.bad);
   const head = ch === 'y' ? c.yesHead : ch === 'n' ? c.noHead : idle ? c.q
     : dec.zone === 'up' ? 'You just changed summer.' : 'You just changed summer. For the worse.';
@@ -265,7 +270,7 @@ function decisionModel(lever) {
   if (idle) dec.pe = undefined;
   else if (dec.pe === undefined || Math.abs(mag - dec.pe) > 0.12 || mag > 0.97) dec.pe = mag;
   const p = flat ? projection(lever, 0, H.weeks) : projection(lever, sign * Math.max(idle ? Math.abs(B) : dec.pe, 0.1), H.weeks);
-  return { c, B, v, idle, e, mag, good, flat, ny, ey, eyb, col, head, headCol, p,
+  return { c, f, B, v, idle, e, mag, good, flat, ny, ey, eyb, col, head, headCol, p,
     line: `M40 ${ny} C 120 ${ny}, 210 ${Math.round((ny + ey) / 2)}, 300 ${ey}`,
     base: `M40 150 C 120 150, 210 ${Math.round((150 + eyb) / 2)}, 300 ${eyb}`,
     projLabel: idle ? 'On your current pace, by summer:' : 'If this becomes your habit, by summer:' };
@@ -277,25 +282,28 @@ function paintDecision() {
   head.textContent = m.head; head.style.color = m.headCol;
 
   const svg = document.getElementById('drag');
-  svg.setAttribute('aria-valuenow', Math.round(m.v * 100));
+  svg.setAttribute('aria-valuenow', Math.round(m.f * m.v * 100));
   svg.setAttribute('aria-valuetext', m.p.text);
   const showBase = !m.idle && Math.abs(m.B) > 0.02;
+  // Good half is on top for build-up habits, at the bottom for cut-back ones.
+  const up = m.f > 0, gY = up ? 0 : 150, bY = up ? 150 : 0;
+  const above = (y) => y <= 150;  // is a point on the upper half of the chart?
   svg.innerHTML = `
-    <rect x="0" y="0" width="350" height="150" fill="${C.good}" opacity="0.05"/>
-    <rect x="0" y="150" width="350" height="150" fill="${C.bad}" opacity="0.05"/>
-    <text x="20" y="34" class="t-display" font-size="16" fill="${C.good}">${esc(c.top)}</text>
-    <text x="20" y="278" class="t-display" font-size="16" fill="${C.bad}">${esc(c.bot)}</text>
-    <text x="20" y="54" font-size="12" fill="${C.good}">${esc(c.up)}</text>
-    <text x="20" y="258" font-size="12" fill="${C.bad}">${esc(c.down)}</text>
+    <rect x="0" y="${gY}" width="350" height="150" fill="${C.good}" opacity="0.05"/>
+    <rect x="0" y="${bY}" width="350" height="150" fill="${C.bad}" opacity="0.05"/>
+    <text x="20" y="${up ? 34 : 278}" class="t-display" font-size="16" fill="${C.good}">${esc(c.top)}</text>
+    <text x="20" y="${up ? 278 : 34}" class="t-display" font-size="16" fill="${C.bad}">${esc(c.bot)}</text>
+    <text x="20" y="${up ? 54 : 258}" font-size="12" fill="${C.good}">${up ? '↑' : '↓'} ${esc(c.yesHint)}</text>
+    <text x="20" y="${up ? 258 : 54}" font-size="12" fill="${C.bad}">${up ? '↓' : '↑'} ${esc(c.noHint)}</text>
     <path d="${m.line} L 300 150 L 40 150 Z" fill="${m.col}" opacity="${(0.06 + m.mag * 0.24).toFixed(2)}"/>
     <path d="M40 150 H300" stroke="${C.ghost}" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>
-    <text x="150" y="${m.e >= 0 ? 168 : 140}" font-size="12" fill="${C.muted}">old you</text>
+    <text x="150" y="${above(m.ey) ? 168 : 140}" font-size="12" fill="${C.muted}">old you</text>
     <path d="${m.base}" fill="none" stroke="${m.B >= 0 ? C.good : C.bad}" stroke-width="3" stroke-linecap="round" opacity="${showBase ? 0.35 : 0}"/>
-    <text x="296" y="${m.e > m.B ? m.eyb + 18 : m.eyb - 10}" text-anchor="end" font-size="11" fill="${m.B >= 0 ? C.good : C.bad}" opacity="${showBase ? 0.6 : 0}">your current path</text>
+    <text x="296" y="${m.ey < m.eyb ? m.eyb + 18 : m.eyb - 10}" text-anchor="end" font-size="11" fill="${m.B >= 0 ? C.good : C.bad}" opacity="${showBase ? 0.6 : 0}">your current path</text>
     <path d="${m.line}" fill="none" stroke="${m.col}" stroke-width="5" stroke-linecap="round"/>
     <path d="M318 150 h8 V ${m.ey} h-8" fill="none" stroke="${m.col}" stroke-width="2" opacity="${m.flat ? 0 : 1}"/>
     <circle cx="300" cy="${m.ey}" r="9" fill="${m.col}"/>
-    <text x="${Math.abs(m.ey - 150) > 95 ? 282 : 294}" y="${Math.abs(m.ey - 150) > 95 ? m.ey + 7 : m.e >= 0 ? m.ey - 16 : m.ey + 30}" text-anchor="end" class="t-display" font-size="20" fill="${m.col}">${m.flat ? '' : esc(m.good ? c.top : c.bot)}</text>
+    <text x="${Math.abs(m.ey - 150) > 95 ? 282 : 294}" y="${Math.abs(m.ey - 150) > 95 ? m.ey + 7 : above(m.ey) ? m.ey - 16 : m.ey + 30}" text-anchor="end" class="t-display" font-size="20" fill="${m.col}">${m.flat ? '' : esc(m.good ? c.top : c.bot)}</text>
     <circle cx="40" cy="${m.ny}" r="22" fill="#fff" stroke="${C.ink}" stroke-width="4"/>
     <circle cx="40" cy="${m.ny}" r="8" fill="${C.ink}"/>
     <text x="40" y="${m.ny - 30}" text-anchor="middle" class="t-display" font-size="13" fill="${C.ink}">NOW</text>`;
@@ -348,7 +356,7 @@ app.addEventListener('pointerdown', (ev) => {
 app.addEventListener('pointermove', (ev) => {
   if (!dec || !dec.drag) return;
   const svg = document.getElementById('drag');
-  dec.v = clamp(dec.grabV + (dec.grabY - yOf(ev, svg)) / 50);
+  dec.v = clamp(dec.grabV + dec.f * (dec.grabY - yOf(ev, svg)) / 50);
   paintDecision();
 });
 const endDrag = () => { if (dec && dec.drag) { dec.drag = false; release(); } };
@@ -358,8 +366,8 @@ app.addEventListener('pointercancel', endDrag);
 app.addEventListener('keydown', (ev) => {
   if (ev.target.id !== 'drag' || !dec) return;
   const k = ev.key;
-  if (k === 'ArrowUp' || k === 'ArrowRight') dec.v = clamp(dec.v + 0.2);
-  else if (k === 'ArrowDown' || k === 'ArrowLeft') dec.v = clamp(dec.v - 0.2);
+  if (k === 'ArrowUp' || k === 'ArrowRight') dec.v = clamp(dec.v + 0.2 * dec.f);  // keys move NOW on screen
+  else if (k === 'ArrowDown' || k === 'ArrowLeft') dec.v = clamp(dec.v - 0.2 * dec.f);
   else if (k === 'Enter' || k === ' ') { done(); ev.preventDefault(); return; }
   else if (k === 'Escape') dec.v = 0;
   else return;
@@ -471,7 +479,7 @@ app.addEventListener('submit', (e) => e.preventDefault());
 function render() {
   const r = route();
   dec = null; form = null;
-  if (r.name === 'decision') { dec = { id: r.id, v: 0, drag: false }; decisionShell(data.levers.find(l => l.id === r.id)); }
+  if (r.name === 'decision') { const l = data.levers.find(x => x.id === r.id); dec = { id: r.id, v: 0, drag: false, f: flipOf(l) }; decisionShell(l); }
   else if (r.name === 'form') {
     const l = r.id && data.levers.find(x => x.id === r.id);
     form = l ? { id: l.id, type: l.type, name: l.name, vals: { ...defaults(l.type), ...l.vals } } : { type: 'snack', name: TYPES.snack.name, vals: defaults('snack') };

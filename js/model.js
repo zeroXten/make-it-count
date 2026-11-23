@@ -5,14 +5,15 @@ const DAY = 864e5;
 const MONTH = 28 * DAY;
 
 /* ---------- Lever types ----------
-   group 'less' = a habit to cut back (up means skipping it).
+   group 'less' = a habit to cut back (down means skipping it: the chart plots how much you do it).
    group 'more' = a habit to build up (up means doing it).
+   copy yesHint/noHint: the good/bad gesture, without an arrow (the app adds it per direction).
    fields: [key, label, min, max, step, default, unit]
    Outcome flags pick which everyday comparisons a type uses:
      kcal: weight (value = how much of the calorie figure counts), cost: money, time: evenings.
    levels: qualitative outcome by drag distance. chip: [gain, loss] words for the home hero. */
-const SKIP_UP = { up: '↑ skip it', down: '↓ have it' };
-const DO_UP = { up: '↑ do it now', down: '↓ skip it' };
+const SKIP = { yesHint: 'skip it', noHint: 'have it' };
+const DO = { yesHint: 'do it now', noHint: 'skip it' };
 const fitLevels = (good, bad) => ({ good: [[0.45, `a bit ${good[0]}`], [0.8, `noticeably ${good[0]}`], [2, good[1]]], bad: [[0.45, `a bit ${bad[0]}`], [0.8, `noticeably ${bad[0]}`], [2, bad[1]]] });
 
 export const TYPES = {
@@ -20,58 +21,58 @@ export const TYPES = {
   snack: {
     group: 'less', label: 'Snacks', name: 'Snack', kcal: 1, cost: true,
     fields: [['kcal', 'Calories each', 0, 800, 10, 150, 'kcal'], ['cost', 'Cost each', 0, 10, 0.05, 0.75, 'gbp'], ['usual', 'Usually, per week', 0, 42, 1, 14, 'wk']],
-    copy: { q: 'Snack?', top: 'lighter', bot: 'heavier', ...SKIP_UP, small: ['a little lighter', 'a little heavier'],
+    copy: { q: 'Snack?', top: 'lighter', bot: 'heavier', ...SKIP, small: ['a little lighter', 'a little heavier'],
       goodSub: 'Clothes fit better. More energy. Less puffed on the stairs.',
       badSub: 'Tighter jeans. Less energy. Same summer as last year, only heavier.',
       yesText: () => 'Skipped. Clothes that fit better, more energy, less puffed on the stairs. That’s what you just chose.',
-      noText: () => 'Had it. You just pulled summer-you down. Make the next one count.',
+      noText: () => 'Had it. You just set summer-you back. Make the next one count.',
       fact: (n) => `${n} skipped this month` }
   },
   sweets: {
     group: 'less', label: 'Sweets & desserts', name: 'Sweet treats', kcal: 1, cost: true,
     fields: [['kcal', 'Calories each', 0, 1000, 10, 250, 'kcal'], ['cost', 'Cost each', 0, 10, 0.1, 0, 'gbp'], ['usual', 'Usually, per week', 0, 28, 1, 5, 'wk']],
-    copy: { q: 'Sweet treat?', top: 'lighter', bot: 'heavier', ...SKIP_UP, small: ['a little lighter', 'a little heavier'],
+    copy: { q: 'Sweet treat?', top: 'lighter', bot: 'heavier', ...SKIP, small: ['a little lighter', 'a little heavier'],
       goodSub: 'Clothes fit better. Steadier energy. No sugar crash.',
       badSub: 'Tighter jeans. Sugar crashes. Same summer as last year, only heavier.',
       yesText: () => 'Skipped. Clothes that fit better, steadier energy. That’s what you just chose.',
-      noText: () => 'Had it. You just pulled summer-you down. Make the next one count.',
+      noText: () => 'Had it. You just set summer-you back. Make the next one count.',
       fact: (n) => `${n} skipped this month` }
   },
   alcohol: {
     group: 'less', label: 'Alcohol', name: 'Alcohol', kcal: 1, cost: true,
     fields: [['kcal', 'Calories per drink', 0, 600, 10, 180, 'kcal'], ['cost', 'Cost per drink', 0, 20, 0.1, 5, 'gbp'], ['usual', 'Drinks, usually per week', 0, 70, 1, 10, 'wk']],
-    copy: { q: 'Drink?', top: 'lighter', bot: 'heavier', up: '↑ not this one', down: '↓ have it', small: ['a little lighter', 'a little heavier'],
+    copy: { q: 'Drink?', top: 'lighter', bot: 'heavier', yesHint: 'not this one', noHint: 'have it', small: ['a little lighter', 'a little heavier'],
       goodSub: 'Better sleep. Clearer mornings. Money in your pocket.',
       badSub: 'Heavier. Foggier mornings. Money gone.',
       yesText: () => 'Skipped. Better sleep, clearer mornings, money kept. That’s what you just chose.',
-      noText: () => 'Had it. You just pulled summer-you down. Make the next one count.',
+      noText: () => 'Had it. You just set summer-you back. Make the next one count.',
       fact: (n) => `${n} skipped this month` }
   },
   takeaway: {
     group: 'less', label: 'Takeaways', name: 'Takeaway', kcal: 1, cost: true,
     fields: [['kcal', 'Extra calories vs cooking', 0, 2000, 50, 500, 'kcal'], ['cost', 'Extra cost vs cooking', 0, 60, 1, 12, 'gbp'], ['usual', 'Usually, per week', 0, 21, 1, 2, 'wk']],
-    copy: { q: 'Takeaway?', top: 'lighter', bot: 'heavier', up: '↑ cook instead', down: '↓ order it', small: ['a little lighter', 'a little heavier'],
+    copy: { q: 'Takeaway?', top: 'lighter', bot: 'heavier', yesHint: 'cook instead', noHint: 'order it', small: ['a little lighter', 'a little heavier'],
       goodSub: 'Lighter. Richer. Feeling better for it.',
       badSub: 'Heavier. Poorer. Sluggish evenings.',
       yesText: () => 'Cooking it is. Lighter, richer, feeling better. That’s what you just chose.',
-      noText: () => 'Ordered. You just pulled summer-you down. Make the next one count.',
+      noText: () => 'Ordered. You just set summer-you back. Make the next one count.',
       fact: (n) => `${n} cooked instead this month` }
   },
   smoking: {
     group: 'less', label: 'Smoking & vaping', name: 'Smoking', cost: true,
     fields: [['cost', 'Cost each (cigarette, vape session…)', 0, 2, 0.05, 0.8, 'gbp'], ['usual', 'Usually, per week', 0, 420, 5, 70, 'wk']],
-    copy: { q: 'Smoke?', top: 'healthier', bot: 'less healthy', ...SKIP_UP, small: ['a little healthier', 'a little less healthy'],
+    copy: { q: 'Smoke?', top: 'healthier', bot: 'less healthy', ...SKIP, small: ['a little healthier', 'a little less healthy'],
       ...fitLevels(['healthier', 'properly healthier'], ['wheezier', 'short of breath']),
       goodSub: 'Easier breathing. Better taste and smell. Money kept.',
       badSub: 'Shorter breath. Money up in smoke.',
       yesText: () => 'Skipped. Easier breathing, money kept. That’s what you just chose.',
-      noText: () => 'Had one. You just pulled summer-you down. Make the next one count.',
+      noText: () => 'Had one. You just set summer-you back. Make the next one count.',
       chip: ['healthier', 'health'], fact: (n) => `${n} skipped this month` }
   },
   screen: {
     group: 'less', label: 'Screen time', name: 'Scrolling', time: true,
     fields: [['min', 'Minutes each time', 5, 180, 5, 20, 'min'], ['usual', 'Times, usually per week', 0, 140, 1, 28, 'wk']],
-    copy: { q: null, top: 'more time', bot: 'less time', up: '↑ put it down', down: '↓ carry on', small: ['a little time back', 'a little time lost'],
+    copy: { q: null, top: 'more time', bot: 'less time', yesHint: 'put it down', noHint: 'carry on', small: ['a little time back', 'a little time lost'],
       goodSub: 'Time for the things you keep putting off. Better sleep. A calmer head.',
       badSub: 'Evenings gone to the feed, with nothing to show for them.',
       yesText: () => 'Put down. That’s time back for things that matter. That’s what you just chose.',
@@ -81,11 +82,11 @@ export const TYPES = {
   spending: {
     group: 'less', label: 'Spending', name: 'Impulse buys', cost: true,
     fields: [['cost', 'Typical cost', 0, 500, 5, 25, 'gbp'], ['usual', 'Usually, per week', 0, 21, 1, 3, 'wk']],
-    copy: { q: 'Buy it?', top: 'richer', bot: 'poorer', up: '↑ leave it', down: '↓ buy it', small: ['a little richer', 'a little poorer'],
+    copy: { q: 'Buy it?', top: 'richer', bot: 'poorer', yesHint: 'leave it', noHint: 'buy it', small: ['a little richer', 'a little poorer'],
       goodSub: 'Money for things you actually want. Less clutter.',
       badSub: 'Money gone on things you’ll forget you bought.',
       yesText: () => 'Left it. That money’s going somewhere better. That’s what you just chose.',
-      noText: () => 'Bought it. You just pulled summer-you down. Make the next one count.',
+      noText: () => 'Bought it. You just set summer-you back. Make the next one count.',
       fact: (n) => `${n} left on the shelf this month` }
   },
 
@@ -93,7 +94,7 @@ export const TYPES = {
   exercise: {
     group: 'more', label: 'Exercise', name: 'Exercise', kcal: 0.6, // trackers overestimate burn
     fields: [['min', 'Minutes each', 5, 240, 5, 30, 'min'], ['kcal', 'Calories burned (0 if not sure)', 0, 2000, 10, 200, 'kcal'], ['usual', 'Usually, per week', 0, 14, 1, 2, 'wk']],
-    copy: { q: null, top: 'fitter', bot: 'less fit', ...DO_UP,
+    copy: { q: null, top: 'fitter', bot: 'less fit', ...DO,
       ...fitLevels(['fitter', 'properly fit'], ['less fit', 'back to where you started']),
       goodSub: 'More energy. A stronger body. What was hard feels easy.',
       badSub: 'The fitness you built fades. It all feels hard again.',
@@ -105,7 +106,7 @@ export const TYPES = {
   sleep: {
     group: 'more', label: 'Sleep', name: 'Sleep',
     fields: [['gain', 'Extra sleep per early night', 15, 180, 5, 45, 'min'], ['usual', 'Early nights now, per week', 0, 7, 1, 1, 'wk']],
-    copy: { q: 'Bed now?', top: 'sharper', bot: 'foggier', up: '↑ go to bed', down: '↓ stay up',
+    copy: { q: 'Bed now?', top: 'sharper', bot: 'foggier', yesHint: 'go to bed', noHint: 'stay up',
       ...fitLevels(['sharper', 'properly rested'], ['foggier', 'running on fumes']),
       goodSub: 'Clearer mornings. Steadier moods. Better days.',
       badSub: 'Foggy mornings. Shorter fuse. Tomorrow-you pays for tonight.',
@@ -120,7 +121,7 @@ export const TYPES = {
   fruit: {
     group: 'more', label: 'Fruit & veg', name: 'Fruit & veg',
     fields: [['usual', 'Portions a week now', 0, 70, 1, 14, 'n']],
-    copy: { q: 'Fruit or veg instead?', top: 'more energy', bot: 'less energy', up: '↑ have some', down: '↓ skip it',
+    copy: { q: 'Fruit or veg instead?', top: 'more energy', bot: 'less energy', yesHint: 'have some', noHint: 'skip it',
       ...fitLevels(['brighter', 'properly well'], ['flat', 'running on empty']),
       goodSub: 'More energy in the afternoons. Better skin. Fewer colds.',
       badSub: 'Afternoon slumps. More colds. Same tired summer.',
@@ -132,7 +133,7 @@ export const TYPES = {
   learning: {
     group: 'more', label: 'Learning', name: 'Learning',
     fields: [['min', 'Minutes each', 5, 180, 5, 20, 'min'], ['usual', 'Usually, per week', 0, 21, 1, 3, 'wk']],
-    copy: { q: null, top: 'more skilled', bot: 'rustier', ...DO_UP,
+    copy: { q: null, top: 'more skilled', bot: 'rustier', ...DO,
       ...fitLevels(['better at it', 'properly good at it'], ['rusty', 'back to where you started']),
       goodSub: 'What was hard comes easily. Something to show for the year.',
       badSub: 'The progress you made fades. Same as last year.',
@@ -144,7 +145,7 @@ export const TYPES = {
   mindfulness: {
     group: 'more', label: 'Mindfulness', name: 'Meditation',
     fields: [['min', 'Minutes each', 1, 60, 1, 10, 'min'], ['usual', 'Usually, per week', 0, 21, 1, 3, 'wk']],
-    copy: { q: null, top: 'calmer', bot: 'more frazzled', ...DO_UP,
+    copy: { q: null, top: 'calmer', bot: 'more frazzled', ...DO,
       ...fitLevels(['calmer', 'properly calm'], ['more frazzled', 'frazzled']),
       goodSub: 'Steadier. Less reactive. Better sleep.',
       badSub: 'More frazzled. Shorter fuse. Worse sleep.',
