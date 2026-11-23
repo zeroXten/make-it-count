@@ -324,7 +324,7 @@ function paintDecision() {
     const y = pend !== 'n';
     res.innerHTML = `<div class="result ${pend ? (y ? 'good' : 'bad') : 'placeholder'}" ${pend ? '' : 'aria-hidden="true"'}>
       <div>${esc(y ? c.yesText(lever.vals) : c.noText(lever.vals))}</div>
-      <div class="row-start"><button class="btn-ghost" id="done" ${pend ? '' : 'tabindex="-1" disabled'}>Done</button></div></div>`;
+      <div class="row-end"><button class="btn-ghost" id="done" ${pend ? '' : 'tabindex="-1" disabled'}>Done</button></div></div>`;
   }
   seasonalise(app);
 }

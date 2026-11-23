@@ -51,7 +51,7 @@ That sentence is the product. Every design decision should be tested against it.
   1. *Your path* — the trajectory card above.
   2. *Streaks* — one row per lever, best streak first, top 4 shown ("+N more"). Each row: name, today status (*today ✓* green / *today?* amber when a live streak isn't banked yet / *best N* when broken), a 7-day strip (green good, red slipped, empty none; today outlined) and the streak count. A lever's day counts when its good choices outnumber its bad. Headline: "Keep them alive today." if any live streak is unbanked, "Don't break them." if all are banked, "Start a streak today." if none. Footer: longest-ever streak and which lever. Rows link to that lever's decision screen.
   3. *Banked* — "Already banked." Total good choices plus what they've already earned (real, not projected): weight comparison, £ kept, evenings back, and sessions per build-up lever.
-- **Lever tiles** (2-col grid). Each tile: name, a mini line vs dashed old-you (green climbing / grey flat / red falling), and one concrete fact ("9 skipped this month", "Less than last month" in red). No abstract status words ("ahead of usual" was rejected).
+- **Lever tiles** (2-col grid). Each tile: name, a mini line vs dashed old-you (the 4-week trend, see Direction below), and **what you've done today**: "Today: 2 skipped · 3 had", "Today: 1 done", or "Nothing yet today". Red when today's slips outnumber good choices. Day-to-day tracking beats a monthly total. No abstract status words ("ahead of usual" was rejected).
 - Tapping a tile opens its decision screen. Last tile: "+ Add a lever".
 
 ### 5.2 Decision — `previews/03…09`
@@ -75,7 +75,7 @@ The core interaction. One per lever (snack and stance holds shown).
    - At rest: "On your current pace, by summer: **You, nearly a bag of sugar lighter.**"
    - While dragging: "If this becomes your habit, by summer: **You, a bag of sugar heavier.** Tighter jeans. Less energy. Same summer as last year, only heavier."
    - Panel fills green/red to match.
-6. **Result card + Done** whenever NOW is left past ±60%. No Undo: nothing is logged until Done.
+6. **Result card + Done** whenever NOW is left past ±60%. Done sits bottom-right of the card, on the thumb side. No Undo: nothing is logged until Done.
 
 #### 5.2.1 Gesture
 

@@ -1,3 +1,3 @@
 /* App version (semver). Bump on every change that ships:
    patch = fix, minor = new feature or behaviour change, major = data/format break. */
-export const VERSION = '0.13.0';
+export const VERSION = '0.14.0';

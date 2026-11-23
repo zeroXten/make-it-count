@@ -22,6 +22,7 @@ button { font: inherit; }
 }
 .row { display: flex; justify-content: space-between; align-items: center; }
 .row-start { display: flex; gap: 10px; align-items: center; }
+.row-end { display: flex; gap: 10px; align-items: center; justify-content: flex-end; } /* thumb side on a phone */
 .muted { color: var(--muted); }
 .small { font-size: 12px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; }

@@ -11,7 +11,8 @@ const MONTH = 28 * DAY;
    fields: [key, label, min, max, step, default, unit]
    Outcome flags pick which everyday comparisons a type uses:
      kcal: weight (value = how much of the calorie figure counts), cost: money, time: evenings.
-   levels: qualitative outcome by drag distance. chip: [gain, loss] words for the home hero. */
+   levels: qualitative outcome by drag distance. chip: [gain, loss] words for the home hero.
+   today: [good, bad] words for the home tile's count of today's choices. */
 const SKIP = { yesHint: 'skip it', noHint: 'have it' };
 const DO = { yesHint: 'do it now', noHint: 'skip it' };
 const fitLevels = (good, bad) => ({ good: [[0.45, `a bit ${good[0]}`], [0.8, `noticeably ${good[0]}`], [2, good[1]]], bad: [[0.45, `a bit ${bad[0]}`], [0.8, `noticeably ${bad[0]}`], [2, bad[1]]] });
@@ -26,7 +27,7 @@ export const TYPES = {
       badSub: 'Tighter jeans. Less energy. Same summer as last year, only heavier.',
       yesText: () => 'Skipped. Clothes that fit better, more energy, less puffed on the stairs. That’s what you just chose.',
       noText: () => 'Had it. You just set summer-you back. Make the next one count.',
-      fact: (n) => `${n} skipped this month` }
+      today: ['skipped', 'had'] }
   },
   sweets: {
     group: 'less', label: 'Sweets & desserts', name: 'Sweet treats', kcal: 1, cost: true,
@@ -36,7 +37,7 @@ export const TYPES = {
       badSub: 'Tighter jeans. Sugar crashes. Same summer as last year, only heavier.',
       yesText: () => 'Skipped. Clothes that fit better, steadier energy. That’s what you just chose.',
       noText: () => 'Had it. You just set summer-you back. Make the next one count.',
-      fact: (n) => `${n} skipped this month` }
+      today: ['skipped', 'had'] }
   },
   alcohol: {
     group: 'less', label: 'Alcohol', name: 'Alcohol', kcal: 1, cost: true,
@@ -46,7 +47,7 @@ export const TYPES = {
       badSub: 'Heavier. Foggier mornings. Money gone.',
       yesText: () => 'Skipped. Better sleep, clearer mornings, money kept. That’s what you just chose.',
       noText: () => 'Had it. You just set summer-you back. Make the next one count.',
-      fact: (n) => `${n} skipped this month` }
+      today: ['skipped', 'had'] }
   },
   takeaway: {
     group: 'less', label: 'Takeaways', name: 'Takeaway', kcal: 1, cost: true,
@@ -56,7 +57,7 @@ export const TYPES = {
       badSub: 'Heavier. Poorer. Sluggish evenings.',
       yesText: () => 'Cooking it is. Lighter, richer, feeling better. That’s what you just chose.',
       noText: () => 'Ordered. You just set summer-you back. Make the next one count.',
-      fact: (n) => `${n} cooked instead this month` }
+      today: ['cooked instead', 'ordered'] }
   },
   smoking: {
     group: 'less', label: 'Smoking & vaping', name: 'Smoking', cost: true,
@@ -67,7 +68,7 @@ export const TYPES = {
       badSub: 'Shorter breath. Money up in smoke.',
       yesText: () => 'Skipped. Easier breathing, money kept. That’s what you just chose.',
       noText: () => 'Had one. You just set summer-you back. Make the next one count.',
-      chip: ['healthier', 'health'], fact: (n) => `${n} skipped this month` }
+      chip: ['healthier', 'health'], today: ['skipped', 'had'] }
   },
   screen: {
     group: 'less', label: 'Screen time', name: 'Scrolling', time: true,
@@ -77,7 +78,7 @@ export const TYPES = {
       badSub: 'Evenings gone to the feed, with nothing to show for them.',
       yesText: () => 'Put down. That’s time back for things that matter. That’s what you just chose.',
       noText: () => 'Carried on. That time doesn’t come back. Make the next one count.',
-      fact: (n) => `${n} put down this month` }
+      today: ['put down', 'carried on'] }
   },
   spending: {
     group: 'less', label: 'Spending', name: 'Impulse buys', cost: true,
@@ -87,7 +88,7 @@ export const TYPES = {
       badSub: 'Money gone on things you’ll forget you bought.',
       yesText: () => 'Left it. That money’s going somewhere better. That’s what you just chose.',
       noText: () => 'Bought it. You just set summer-you back. Make the next one count.',
-      fact: (n) => `${n} left on the shelf this month` }
+      today: ['left', 'bought'] }
   },
 
   /* ----- Build up ----- */
@@ -100,7 +101,7 @@ export const TYPES = {
       badSub: 'The fitness you built fades. It all feels hard again.',
       yesText: (v) => `Go. Fitter, stronger, more energy. ${v.min} minutes.`,
       noText: () => 'Skipped. That’s a session summer-you doesn’t get back.',
-      chip: ['fitter', 'fitness'], fact: (n) => `${n} sessions this month` },
+      chip: ['fitter', 'fitness'], today: ['done', 'skipped'] },
     preview: { head: 'One more a week, and summer-you is…', lines: () => ['fitter and stronger'] }
   },
   sleep: {
@@ -112,7 +113,7 @@ export const TYPES = {
       badSub: 'Foggy mornings. Shorter fuse. Tomorrow-you pays for tonight.',
       yesText: () => 'Lights out. Clearer mornings, steadier moods. That’s what you just chose.',
       noText: () => 'Staying up. Tomorrow-you pays for tonight. Make the next one count.',
-      chip: ['better rested', 'sleep'], fact: (n) => `${n} early nights this month` },
+      chip: ['better rested', 'sleep'], today: ['early', 'stayed up'] },
     preview: { head: 'Two more early nights a week, and by summer…', lines: (v, weeks) => {
       const days = 2 * weeks * (v.gain || 45) / 60 / 24;
       return ['fewer foggy mornings', days >= 1.5 ? `${Math.round(days)} extra days of sleep banked` : days >= 1 ? 'a full extra day of sleep banked' : 'hours of sleep banked'];
@@ -127,7 +128,7 @@ export const TYPES = {
       badSub: 'Afternoon slumps. More colds. Same tired summer.',
       yesText: () => 'Done. More energy, fewer slumps. That’s what you just chose.',
       noText: () => 'Skipped. Summer-you runs a little flatter. Make the next one count.',
-      chip: ['more energy', 'energy'], fact: (n) => `${n} extra portions this month` },
+      chip: ['more energy', 'energy'], today: ['had', 'skipped'] },
     preview: { head: 'One more a day, and by summer…', lines: (v, weeks) => ['more energy in the afternoons', `${Math.round(weeks * 7 / 10) * 10} more portions`] }
   },
   learning: {
@@ -139,7 +140,7 @@ export const TYPES = {
       badSub: 'The progress you made fades. Same as last year.',
       yesText: (v) => `Go. ${v.min} minutes closer to properly good at it.`,
       noText: () => 'Skipped. That’s a session summer-you doesn’t get back.',
-      chip: ['more skilled', 'progress'], fact: (n) => `${n} sessions this month` },
+      chip: ['more skilled', 'progress'], today: ['done', 'skipped'] },
     preview: { head: 'One more session a week, and by summer…', lines: () => ['noticeably better at it', 'something to show for the year'] }
   },
   mindfulness: {
@@ -151,7 +152,7 @@ export const TYPES = {
       badSub: 'More frazzled. Shorter fuse. Worse sleep.',
       yesText: (v) => `Go. ${v.min} minutes to a calmer you.`,
       noText: () => 'Skipped. That’s a calmer day summer-you doesn’t get.',
-      chip: ['calmer', 'calm'], fact: (n) => `${n} sessions this month` },
+      chip: ['calmer', 'calm'], today: ['done', 'skipped'] },
     preview: { head: 'One more a week, and by summer…', lines: () => ['calmer', 'less reactive, sleeping better'] }
   }
 };
@@ -264,13 +265,18 @@ export function leverStats(lever, events, now = Date.now()) {
   return { y, n, yPrev };
 }
 
-/* Tile: trend + one concrete fact. */
-export function tileInfo(lever, events) {
-  const s = leverStats(lever, events), c = TYPES[lever.type].copy;
-  if (!s.y && !s.n && !s.yPrev) return { trend: 'flat', fact: 'No change yet', bad: false };
-  if (s.y < s.yPrev || s.n > s.y) return { trend: 'down', fact: s.y < s.yPrev ? 'Less than last month' : `${s.n} slipped this month`, bad: true };
-  if (s.y === 0) return { trend: 'flat', fact: 'No change yet', bad: false };
-  return { trend: 'up', fact: c.fact(s.y), bad: false };
+/* Tile: the 4-week trend (sparkline) + what you've done today (fact), e.g. "Today: 2 skipped · 1 had". */
+export function tileInfo(lever, events, now = Date.now()) {
+  const s = leverStats(lever, events, now), [gw, bw] = TYPES[lever.type].copy.today;
+  const midnight = new Date(now); midnight.setHours(0, 0, 0, 0);
+  let ty = 0, tn = 0;
+  for (const ev of events) if (ev.leverId === lever.id && ev.t >= midnight.getTime() && ev.t <= now) ev.c === 'y' ? ty++ : tn++;
+  const parts = [ty && `${ty} ${gw}`, tn && `${tn} ${bw}`].filter(Boolean);
+  const fact = parts.length ? `Today: ${parts.join(' · ')}` : 'Nothing yet today', bad = tn > ty;
+  if (!s.y && !s.n && !s.yPrev) return { trend: 'flat', fact, bad };
+  if (s.y < s.yPrev || s.n > s.y) return { trend: 'down', fact, bad };
+  if (s.y === 0) return { trend: 'flat', fact, bad };
+  return { trend: 'up', fact, bad };
 }
 
 /* Current-path position for the decision chart, in [-0.75, 0.75]. */
