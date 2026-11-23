@@ -68,6 +68,11 @@ button { font: inherit; }
 .tile-name svg { flex: none; margin-top: 1px; }
 .tile-fact { font-size: 13px; color: var(--muted); }
 .tile-fact.bad { color: var(--bad); }
+/* Habit type on the tile: building up = teal, cutting back = pink. The sparkline keeps green/red for outcome. */
+.tile.more { background: color-mix(in srgb, var(--more) 7%, var(--card)); border-color: color-mix(in srgb, var(--more) 28%, var(--card)); }
+.tile.less { background: color-mix(in srgb, var(--less) 6%, var(--card)); border-color: color-mix(in srgb, var(--less) 26%, var(--card)); }
+.tile.more .tile-name > span { color: var(--more); }
+.tile.less .tile-name > span { color: var(--less); }
 .tile-add { border: 1.5px dashed #B9B3A6; background: transparent; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; }
 .btn-start { text-decoration: none; font-size: 17px; padding: 16px; }
 .hero-chart .draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.2s ease-out .2s forwards; }

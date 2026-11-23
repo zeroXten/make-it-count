@@ -39,9 +39,10 @@ function route() {
 const nav = (hash) => { location.hash = hash; };
 
 /* ================= Home ================= */
+/* Last 4 weeks at a glance. Colour is the outcome (green good, red slipping); the slope is
+   what you're doing, so cut-back habits are mirrored: going well heads down, slipping climbs. */
 function spark(trend, g = 'more') {
-  // Cut-back habits are drawn mirrored: doing well heads down.
-  const P = { up: [g === 'less' ? C.less : C.more, 'M2 18 C 14 17, 26 10, 42 3'], flat: ['#8A8F96', 'M2 15 C 14 15, 28 14, 42 14'], down: [C.bad, 'M2 15 C 12 6, 20 4, 26 7 C 32 10, 38 14, 42 16'] }[trend];
+  const P = { up: [C.good, 'M2 18 C 14 17, 26 10, 42 3'], flat: ['#8A8F96', 'M2 15 C 14 15, 28 14, 42 14'], down: [C.bad, 'M2 15 C 12 6, 20 4, 26 7 C 32 10, 38 14, 42 16'] }[trend];
   return `<svg width="44" height="22" viewBox="0 0 44 22" aria-hidden="true"><g${g === 'less' ? ' transform="translate(0 22) scale(1 -1)"' : ''}><path d="M2 15 H42" stroke="#C9C4B9" stroke-width="1.5" stroke-dasharray="3 3"/><path d="${P[1]}" fill="none" stroke="${P[0]}" stroke-width="2.5" stroke-linecap="round"/></g></svg>`;
 }
 
@@ -183,7 +184,7 @@ function showSlide(i) {
 function home() {
   const tiles = data.levers.map(l => {
     const t = tileInfo(l, data.events);
-    return `<a class="tile" href="#/lever/${l.id}">
+    return `<a class="tile ${groupOf(l)}" href="#/lever/${l.id}">
       <span class="tile-name"><span>${esc(l.name)}</span>${spark(t.trend, groupOf(l))}</span>
       <span class="tile-fact ${t.bad ? 'bad' : ''}">${t.fact}</span></a>`;
   }).join('');

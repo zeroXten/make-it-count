@@ -153,8 +153,8 @@ Shown with colour only, no icons or headings. Direction colours are deliberately
 
 - **Building up** (exercise, sleep, fruit & veg…): **teal** (`#0F766E`, on dark `#2DD4BF`). Streak unit *days done*, status *done today ✓*.
 - **Cutting back** (snacks, alcohol, scrolling…): **pink** (`#BE185D`, on dark `#F472B6`). Streak unit *days clear*, status *clear today ✓*.
-- Applies to home tile sparklines and the streaks card (day squares, count, status). Red still means a slip.
-- Cut-back sparklines are mirrored to match the drag: doing well heads down.
+- Applies to home tiles (soft tinted background, name in the direction colour) and the streaks card (day squares, count, status). Red still means a slip.
+- **Tile sparklines show outcome, not direction.** They summarise the last 4 weeks (up = more good choices than slips and no fewer than last month; down = slipping; flat = nothing logged). Colour is green for going well, red for slipping. The slope follows the habit: build-up goes up when it's going well, cut-back is mirrored and goes down when it's going well, up when slipping.
 
 ### Good vs bad outcome
 
